@@ -631,7 +631,7 @@ to attach them to the start of each source file to most effectively
 state the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    apFramwork is a PHP general purpose MVC framework. 
+    apFramework is a PHP general purpose MVC framework. 
     Copyright (C) 2014 Apfutura Internacional Soluciones S.L.
 
     This program is free software: you can redistribute it and/or modify
