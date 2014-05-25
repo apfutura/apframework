@@ -1,0 +1,140 @@
+<?php
+include_once(constant('_GLOBAL_MODEL_DIR')."elements/{$MNTCLASSNAME}.php" );
+
+class {$CONTROLLER_NAME} extends apControllerTask {
+
+	protected $timeTaken;	
+	{$IF {$ISMNT}==true THEN}
+	protected $mnt=null;
+	{$ENDIF}
+	
+	function onInit() {
+		apUtils\startTimeReference();
+		$this->validateUser = {$VALIDATEUSER};
+		{$IF {$ISMNT}!=0 THEN}
+		$this->_setupMnt();
+		{$ENDIF}
+	}
+
+	function onEnd($operation) {
+		apUtils\logToApache(get_class($this)."-". $operation.": ".apUtils\stopTimeReference());
+	}	
+	{$IF {$VALIDATEUSER}==true THEN}	
+	function onPermissionsError($operation) {
+		throw new Exception("{\$L_NOT_ENOUGH_PERMISSIONS}");		
+	}
+	{$ENDIF}
+			
+	/* Default Forms */
+	
+	function get() {
+		$msg = array();
+		$msg["SECTION"] = "{$CONTROLLER_NAME}.html";	 
+		{$IF {$VALIDATEUSER}==true THEN}
+		$msg["IS_ADMIN"] = ($this->user->isAdmin()?1:0);
+		{$ENDIF}	
+		{$IF {$ISMNT}==true THEN}	
+		$this->_generateHtmlList();		
+		{$ENDIF}
+		$this->renderApTemplate("index.html", $msg, '{$PAGE_TITLE}');	
+	}
+	
+	{$IF {$ISMNT}==true THEN}
+	function edit() {
+		$id = apUtils\getParamGET("id", apUtils\PARAM_INT);
+		$msg["SECTION"] = "{$CONTROLLER_NAME}.html";
+		$msg["IS_ADMIN"] = ($this->user->isAdmin()?1:0);
+		$this->mnt->printEditForm($id);
+		$this->renderApTemplate("index.html", $msg, '<a href="?task='.get_class($this).'">{$PAGE_TITLE}</a> | {$L_EDIT} ');
+	}
+	
+	function add() {
+		$msg["SECTION"] = "{$CONTROLLER_NAME}.html";
+		$msg["IS_ADMIN"] = ($this->user->isAdmin()?1:0);
+		$this->mnt->printEditForm();
+		$this->renderApTemplate("index.html", $msg, '<a href="?task='.get_class($this).'">{$PAGE_TITLE}</a> | {$L_ADD} ');
+	}	
+	{$ENDIF}
+	
+	/* Default Ajax Actions */	
+	{$IF {$ISMNT}==true THEN}
+	function insert() {
+		$data  = $_POST;
+		${$MNTCLASSNAME_INSTANCE} = new {$MNTCLASSNAME}();
+		$result = ${$MNTCLASSNAME_INSTANCE}->insert($data);	
+				
+		$this->responseAjaxData( ($result!=false ? true : false) , ($result==false ? array(${$MNTCLASSNAME_INSTANCE}->getDB()->getLastErrorMessage()) : array()) );	
+	} 
+	
+	function update() {
+		$id = apUtils\getParamPOST("{$MNTCLASSNAME_TABLE_ID}", PARAM_INT);
+		$data  = $_POST;
+		${$MNTCLASSNAME_INSTANCE} = new {$MNTCLASSNAME}();
+		${$MNTCLASSNAME_INSTANCE}->load($id);
+		$result = ${$MNTCLASSNAME_INSTANCE}->update($data);
+		$this->responseAjaxData($result, ($result==false ? array(${$MNTCLASSNAME_INSTANCE}->getDB()->getLastErrorMessage()) : array()) );
+	}
+	
+	function delete() {
+		$id = apUtils\getParamPOST("{$MNTCLASSNAME_TABLE_ID}", PARAM_INT);
+		$data  = $_POST;
+		${$MNTCLASSNAME_INSTANCE} = new {$MNTCLASSNAME}();
+		$result = ${$MNTCLASSNAME_INSTANCE}->delete($id);
+		$this->responseAjaxData($result, ($result==false ? array(${$MNTCLASSNAME_INSTANCE}->getDB()->getLastErrorMessage()) : array()) );
+	}
+	{$ENDIF}
+		
+	function getHtmlList(){
+		$data = $this->_generateHtmlList(true);
+		$this->responseAjaxData(true, array(), $data);
+	}
+		
+	/* Default Setup */
+	{$IF {$ISMNT}==true THEN}
+	protected function _setupMnt() {
+		//Mnt
+		
+		//HTML Urls
+		$mnt = new apMntForm('{$MNTCLASSNAME_TABLE}', 50 , new {$MNTCLASSNAME_LIST});
+		$mnt->urlNavigator = "?task={$CONTROLLER_NAME}&operation=get";		
+		$mnt->urlAddForm = "?task={$CONTROLLER_NAME}&operation=add";
+		$mnt->urlEditForm = "?task={$CONTROLLER_NAME}&operation=edit&id=";
+		//Ajax Urls
+		$mnt->urlRefreshHTML = "?task={$CONTROLLER_NAME}&operation=getHtmlList";
+		$mnt->urlInsert = "?task={$CONTROLLER_NAME}&operation=insert";
+		$mnt->urlUpdate = "?task={$CONTROLLER_NAME}&operation=update";
+		$mnt->urlDelete = "?task={$CONTROLLER_NAME}&operation=delete";
+		
+		//Fields:
+		{$FOREACH {@MNTCLASSNAME_TABLE_FIELDS} LOOP}
+		$field = new apMntFormField('{$@.FIELD}','{$@.LABEL}', {$@.FILTRABLE}, {$@.EDITABLE}, {$@.VISIBLE}, {$@.EDITABLEINFORM});
+		$mnt->addField($field);
+		{$ENDLOOP}
+		
+		$field = new apMntFormField('@actionEdit','{\$L_EDIT}');
+		$field->customAttributesFunction = function($record) {
+			return array('style="text-align:center"');
+		};
+		$field->customRenderFunction  = function($record) {
+			return '<img data-id="'.$record->id.'" class="edit_entity" id="edit" src="images/icons/edit.png" style="width:20px;height:auto"/>';
+		};
+		$mnt->addField($field);
+		
+		$field = new apMntFormField('@actionDelete','{\$L_DELETE}');
+		$field->customAttributesFunction = function($record) {
+			return array('style="text-align:center"');
+		};				
+		$field->customRenderFunction  = function($record) {
+			return '<img data-id="'.$record->id.'" class="delete_entity" id="edit" src="images/icons/trashcan.png" style="width:20px;height:auto"/>';
+		};
+		$mnt->addField($field);
+					
+		$this->mnt = $mnt;
+	}
+	{$ENDIF}
+	protected function _generateHtmlList($return = false) {
+		list($offset, $fieldOrderBy, $filterFieldsAssociativeArray) = $this->mnt->getHtmlTableParams();
+		return $this->mnt->printHtmlTable($offset, $fieldOrderBy, $filterFieldsAssociativeArray , $return);
+	}
+	
+}

@@ -1,0 +1,17 @@
+<?php 
+Class {$MNTCLASSNAME} extends apBaseElement {
+	
+	public function __construct() {
+		parent::__construct('{$MNTCLASSNAME_TABLE}');
+		$this->_path = constant('_GLOBAL_TMP_DIR');
+	}
+
+}
+
+Class {$MNTCLASSNAME_LIST} extends apBaseElementList {
+
+	public function __construct($orderByField = null) {
+		parent::__construct("{$MNTCLASSNAME}","{$MNTCLASSNAME_TABLE}", "{$MNTCLASSNAME_TABLE_ID}", $orderByField);
+	}	
+
+}

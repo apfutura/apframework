@@ -1,0 +1,35 @@
+<html>
+<head>
+	<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+	<script type="text/javascript" src="js/libs/jquery.min.js"></script>	
+	<link rel="stylesheet" href="css/index.css">
+	<script type="text/javascript" src="js/?utils.js"></script>	
+	<script>
+		$(function() {
+			$("button").click(function() {
+				$.getJSON("?operation=" + $(this).attr("data-operation"), function(r) {					
+					if (r.result) {
+						debugger;
+						$("#result").html(r.data);
+					} else {
+						alert("Ajax error" + r.messages.join("\n"));
+					}
+				});
+			});
+		});
+	</script>
+	
+</head>
+<body>
+	<DIV>
+		<h3>{$L_EXAMPLE}</h3>
+		<button data-operation="_testAjax1">Test ajax</button>
+		<button data-operation="_testAjax2">Test ajax2</button>
+		<hr>
+		<div id="result">-</div>
+		<hr>
+	</DIV>
+	<a href="?task=test">Test apClasses</a>
+	{$include template="bottom.html"}
+</body>
+</html>

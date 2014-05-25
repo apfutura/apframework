@@ -1,0 +1,70 @@
+* How apFramworks works
+
+Each call to the application expects two parameters in the URL, "task" and "operation".
+"task" will be used to select the controller file to execute, and "operation" to select the funciton within it.
+The default task is "index", so if the parameter is omitted in the URL index.php file within the controller will be used.
+The operation is "get", so if the parameter is omitted in the function "function get()" will be used.
+ 
+For example: 
+http://localhost/?task=login&operation=check will be dispatched to the login.php file inside the /controllers folder (if exists) and to the "check" function (if exists too). Should any of the two be missing, an error will be throwed.
+
+
+
+
+* How to use the "controllers" folder
+
+You need to create a file in controllers folder for each "task = XXX" (URL parameter) you want to server. Each controller file has to be a php class named after the controller extending the apControllerTask class.
+
+For example: 
+For a "task=xxx" in the url the controller file will have to be named xxx.php and have a class called xxx like this 'class xxx extends apControllerTask'. 
+Passing an 'operation = YYYY " in the URL parameters will run the function 'function YYYY()' within the controller class. If no operation is passed in the url the function 'get' will be called instead.
+Optionally the framework expects that operations (aka functions within the controller class) are named with and _ at the beginning of the name if they are ajax calls that return JSON data. 
+
+
+
+
+
+* How to use the framework templating system
+
+The framework provides the apRender class that can be directly used to get the templates contents like this:
+apRender::renderCustom("template_inside_templates_folder,html", $params);
+ 
+The controller class provides the the method "renderApTemplate":
+$this->renderApTemplate("template_inside_templates_folder.html", $params);
+ 
+The templating system can do:
+	- Replacement of variables passed to the template parameter {$VARIABLE} in the template and array("VARIABLE" => "value") in the apRender call 
+	- Translation system: All of the variables starting with {$L_ will be read from the file /ap/lang/lang.en.php file (or whatever is the current language) 
+	- Include uther templates based on variables:   
+		{$include template="{$SECTION}"}
+	- Conditional Content on passed in variables: 	
+		{$IF 1==1 THEN}
+		Always true!
+		{$ELSE}
+		Not shown
+		{$ENDIF}
+		
+		{$IF {$SHOWIP}==1 THEN}
+		SHOWIP is passed in to the render: {$IP}
+		{$ELSE}
+		No SHOWIP is passed in to the render
+		{$ENDIF}
+	- Loops on passed in array variables:
+		{$FOREACH {@USERS2} LOOP}
+		User  {$@.name}  - {$@.age}</br>
+		{$ENDLOOP}
+	
+		{$FOREACH {@USERS} LOOP}
+		Username  <a href="{$C_urlBase}?username={$@}">{$@}</a>
+		{$ENDLOOP}
+		
+		
+
+* How can I use the db classes
+
+To use the classes that interact with the DB the setup.php will have to be correctly set up. These are the variables:
+
+	useDb: should be set to true
+	server, db, user and pass: should be properly set.
+
+If useDb us enabled but the Databaserver data is not correct, the Framework will display an error message and won't execute anything else.

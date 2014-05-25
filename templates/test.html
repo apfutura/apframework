@@ -1,0 +1,40 @@
+<html>
+<head>
+	<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+	<script type="text/javascript" src="js/libs/jquery.min.js"></script>	
+	<link rel="stylesheet" href="css/index.css">
+	<script type="text/javascript" src="js/?utils.js"></script>	
+</head>
+<body>
+	<DIV>
+		<h3>{$L_TEST_AP_CLASSES}</h3>
+		<div>
+			<p><b>apCache.getCacheMethod()</b></p>
+			<p>CacheMethod: {$cacheMethod}</p>
+		</div>		
+		<hr>
+		<div>
+			<p><b>/ap/config/setup.php</b></p>
+			<p>useDb: {$PHP var_dump(CONFIG::$useDb); }</p>
+			<p>server: {$C_server}</p>
+			<p>db: {$C_db}</p>
+		</div>
+		<hr>
+		<div>
+			<p><b>apDatabase.connect()</b></p>
+			<p>Db connection result: {$dbConnectionResult}</p>
+		</div>
+		<hr>
+		{$IF '{$dbConnectionResult}'=='ok' THEN}
+		<div>
+			<p><b>apConfig.get("time")</b></p>
+			<p>get: {$apConfig}</p>
+		</div>		
+		<hr>
+		{$ENDIF}
+		
+	</DIV>
+	<a href=".">{$L_BACK}</a>
+	{$include template="bottom.html"}
+</body>
+</html>
