@@ -6,18 +6,19 @@ class apHtmlUtils {
 		return self::inputHtmlEx( 'text', $inputId, $value, $pEditable , $pVisible , $pDescrip , $pOnchange , $attributes , $classes );
 	}
 	
-	static function inputHtmlEx($type , $inputId,  $value, $pEditable = true ,$pVisible = true ,$pDescrip = "",$pOnchange = "",$attributes = array(), $classes = array() ) {
+	static function inputHtmlEx($type , $inputId,  $value, $pEditable = true ,$pVisible = true ,$pDescrip = "",$pOnchange = "",$attributes = array(), $classes = array(), $pDisabled = false ) {
 		$str_descrip = "";
-		if ($pVisible==true) {			
+		if ($pVisible==true) {
 			if ($pDescrip!="") {
 				$str_descrip=$pDescrip;
 			}
+			$str_disabled = $pDisabled ? 'disabled' : '';
 			if ($pEditable==true) {
 				$str_readonly="";
 			} else {
 				$str_readonly="readonly='READONLY'";
 			}
-			$controlHtml="<input type='".$type."' class='" . implode(" ",$classes) . "' id='" . $inputId . "' name='" . $inputId . "' value='" . $value . "' placeholder='".$str_descrip."' onchange=\"" . $pOnchange . "\" " . $str_readonly . " ".implode(" ",$attributes).">";
+			$controlHtml="<input type='".$type."' class='" . implode(" ",$classes) . "' id='" . $inputId . "' name='" . $inputId . "' value='" . $value . "' placeholder='".$str_descrip."' onchange=\"" . $pOnchange . "\" " . $str_readonly . " " . $str_disabled . " ".implode(" ",$attributes).">";
 		}	else {
 			$controlHtml="<input type=\"hidden\" id=\"" . $inputId . "\" name=\"" . $inputId . "\"  value=\"" . $value . "\"  placeholder='".$str_descrip."' onchange=\"" . $pOnchange . "\" ".implode(" ",$attributes).">";
 		}
@@ -66,8 +67,9 @@ class apHtmlUtils {
 		if (strlen($html_class)==0){
 			$html_class = 'stylishCombo';
 		}
-		$n = new network();
-		$elements = $n->getElementsByTypes($arrayOfTypes,null,null,false);
+		foreach ($arrayOfTypes as $type) {
+			$elements = apexNetwork::getElementsOfType($type);
+		}
 		$a_e = array();
 	
 	
@@ -88,16 +90,16 @@ class apHtmlUtils {
 		return $htmlCombo;
 	}
 	
-	static function comboHtml_fromArray($nom,$array_valors = array(""),$array_ensenya = array(""),$seleccionat,$onchange,$html_class='',$html_stlye='', $option_generic_attributes = null, $array_attributes_select = array(), $array_row_attributes = array()) {
+	static function comboHtml_fromArray($name, $array_values = array(""),$array_label = array(""),$seleccionat,$onchange,$html_class='',$html_stlye='', $option_generic_attributes = null, $array_attributes_select = array(), $array_row_attributes = array()) {
 		if (strlen($html_class)==0){
 			$html_class = 'stylishCombo';
 		}		
-		$retorna="<select id=\"$nom\" name=\"$nom\" class=\"$html_class\" style=\"$html_stlye\" onchange=\"$onchange\" ".implode(" ",$array_attributes_select).">";
-		$num=count($array_valors);
+		$retorna="<select id=\"$name\" name=\"$name\" class=\"$html_class\" style=\"$html_stlye\" onchange=\"$onchange\" ".implode(" ",$array_attributes_select).">";
+		$num=count($array_values);
 		$i=0;
 		while ($i<$num)
 		{
-			if ($seleccionat==$array_valors[$i]) {
+			if ($seleccionat===$array_values[$i]) {
 				$tmpsel="selected='SELECTED'";
 			} else {$tmpsel="";
 			}			
@@ -115,21 +117,21 @@ class apHtmlUtils {
 			} else {
 				$tmpRowAtt="";
 			}
-			$retorna=$retorna."<option value='".$array_valors[$i]."' ".$tmpsel.$tmpatt.$tmpRowAtt.">".$array_ensenya[$i]."</option>\n";
+			$retorna=$retorna."<option value='".$array_values[$i]."' ".$tmpsel.$tmpatt.$tmpRowAtt.">".$array_label[$i]."</option>\n";
 			$i++;
 		}		
 		$retorna=$retorna."</select>";
 		return $retorna;
 	}	
 	
-	static function comboHtml_fromTable($nom,$camp,$camp_id,$text_inicial_combo,$valor_inicial,$taula,$where,$ordre,$seleccionada,$onclick,$html_class='',$html_stlye='', $array_attributes = null, $array_attributes_select = array() ) {
+	static function comboHtml_fromTable($name,$camp,$camp_id,$text_inicial_combo,$valor_inicial,$taula,$where,$ordre,$seleccionada,$onclick,$html_class='',$html_stlye='', $array_attributes = null, $array_attributes_select = array() ) {
 		if (strlen($html_class)==0){
 			$html_class = 'stylishCombo';
 		}
 		$onclick = str_ireplace('"', "'", $onclick);
 		
 		if (!isset($array_attributes_select['id'])) {
-			$tmpId = $nom;
+			$tmpId = $name;
 		} else {
 			$tmpId = $array_attributes_select['id'];
 			unset($array_attributes_select['id']);
@@ -140,7 +142,7 @@ class apHtmlUtils {
 		}
 		//echo $tmpAttr;
 		
-		$retorna="<select name=\"$nom\" id=\"$tmpId\" class=\"$html_class\" style=\"$html_stlye\" onchange=\"$onclick\" ".$tmpAttr.">";
+		$retorna="<select name=\"$name\" id=\"$tmpId\" class=\"$html_class\" style=\"$html_stlye\" onchange=\"$onclick\" ".$tmpAttr.">";
 	
 		if (strlen($text_inicial_combo)>0){
 			$str_tmp="";
@@ -327,14 +329,14 @@ class apHtmlUtils {
 			$offsetVarName = $params["offsetVarName"];
 		}
 		// TODO: take info to construct it from params
-		$nextImg = '<img src="' . self::$tableBrowseImages[0]  .'">';
-		$backImg = '<img src="' . self::$tableBrowseImages[1]  .'">';
-		$firstImg = '<img src="' . self::$tableBrowseImages[2]  .'">';
-		$lastImg = '<img src="' . self::$tableBrowseImages[3]  .'">';
+		$nextImg = '<img src="' . ($params["urlBaseIMG"]?$params["urlBaseIMG"]:"") . self::$tableBrowseImages[0]  .'">';
+		$backImg = '<img src="' . ($params["urlBaseIMG"]?$params["urlBaseIMG"]:"") . self::$tableBrowseImages[1]  .'">';
+		$firstImg = '<img src="' . ($params["urlBaseIMG"]?$params["urlBaseIMG"]:"") . self::$tableBrowseImages[2]  .'">';
+		$lastImg = '<img src="' . ($params["urlBaseIMG"]?$params["urlBaseIMG"]:"") . self::$tableBrowseImages[3]  .'">';
 
 		$idHtmlNavigator = "idHtmlNavigator" . rand(0, 100000);
 		$script ="";
-		$html = "<div id='$idHtmlNavigator' data-url='$url&$offsetVarName=' style='border: 1px solid #transparent; width: 220px; position: relative; min-height: 28px;margin-left:auto;margin-right:auto;margin-top:10px;font-size:1.1em;border: 1px solid grey;padding: 3;top: -10;border-top: none;border-radius: 0 0 4px  4px;background: ghostwhite;'><span>";
+		$html = "<div id='$idHtmlNavigator' data-url='$url&$offsetVarName=' style='width: 240px; position: relative; min-height: 28px;margin-left:auto;margin-right:auto;margin-top:2px;font-size:1.1em;border: 1px solid grey;padding: 3px;top: -2px;border-top: none;border-radius: 0 0 4px  4px;background: ghostwhite;'><span>";
 		
 		if (!isset($params["ajaxLoad"])) {
 			
@@ -348,7 +350,7 @@ class apHtmlUtils {
 					}
 					$pageOptions .= '<option '.$tmpSelectd.' value="'.($x*$limit).'"> {$L_PAGE} -'.($x + 1).'-</option>';
 				}
-				$htmlPages = '<select onchange="document.location.href=\''.$url."&".$offsetVarName."=".'\'+this.options[this.selectedIndex].value;">'.$pageOptions."</select>";
+				$htmlPages = '<select class="htmlNavigator" onchange="document.location.href=\''.$url."&".$offsetVarName."=".'\'+this.options[this.selectedIndex].value;">'.$pageOptions."</select>";
 			} else {
 				$htmlPages = '';
 			}
@@ -359,9 +361,9 @@ class apHtmlUtils {
 			}	
 			
 			if ($registersCount == 0) {
-				$html .= ' <div style="left: 60px;position: absolute;top: 10px;width:100px;text-align:center;">{$L_NORECORDS}</div> ';
+				$html .= ' <div style="left: 65px;position: absolute;top: 10px;width:auto;text-align:center;">{$L_NORECORDS}</div> ';
 			} else {
-				$html .= ' <div style="left: 60px;position: absolute;top: 10px;width:100px;text-align:center;">'.($offset + 1).' - '.($nextLimit>$registersCount?$registersCount:$nextLimit).' {$L_HTMLNAVIGATOR_OF} '.$registersCount.'<br />'.$htmlPages.'</div> ';
+				$html .= ' <div style="left: 65px;position: absolute;top: 10px;width:auto;text-align:center;">'.($offset + 1).' - '.($nextLimit>$registersCount?$registersCount:$nextLimit).' {$L_HTMLNAVIGATOR_OF} '.$registersCount.'<br />'.$htmlPages.'</div> ';
 			}		
 			
 			if ($offset + $registersDisplayed < $registersCount ) {
@@ -393,9 +395,9 @@ class apHtmlUtils {
 			}
 			
 			if ($registersCount == 0) {
-				$html .= ' <div style="left: 60px;position: absolute;top: 10px;width:100px;text-align:center;">{$L_NORECORDS}</div> ';
+				$html .= ' <div style="left: 65px;position: absolute;top: 10px;width:auto;text-align:center;">{$L_NORECORDS}</div> ';
 			} else {
-				$html .= ' <div style="left: 60px;position: absolute;top: 10px;width:100px;text-align:center;">'.($offset + 1).' - '.($nextLimit>$registersCount?$registersCount:$nextLimit).' {$L_HTMLNAVIGATOR_OF} '.$registersCount.'<br />'.$htmlPages.'</div>';
+				$html .= ' <div style="left: 65px;position: absolute;top: 10px;width:auto;text-align:center;">'.($offset + 1).' - '.($nextLimit>$registersCount?$registersCount:$nextLimit).' {$L_HTMLNAVIGATOR_OF} '.$registersCount.'<br />'.$htmlPages.'</div>';
 			}
 			
 				

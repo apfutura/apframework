@@ -71,11 +71,11 @@ class apBaseSQLList {
 		$sqlOrderBy = " ORDER BY xx." . $fieldOrderBy;
 	
 		$SQL = "SELECT * FROM ( ".$this->_sqlQuery.") as xx ". $sqlWhere . $sqlOrderBy . $sqlLimit;
-		$SQLCount = "SELECT count(*) as total FROM ( ".$this->_sqlQuery.") as xx ". $sqlWhere;
+		$SQLCount = "SELECT count(*) as total FROM ( ".$this->_sqlQuery.") as xx ". $sqlWhere;		
 		$result = $this->_db->query($SQL,PDO::FETCH_OBJ);
 		$resultCount = $this->_db->query($SQLCount,PDO::FETCH_OBJ);
 		$_elementsList = array();
-		if ($result!=false) {
+		if ($result!==false) {
 			foreach ($result as $entity) {				
 				if ($this->throwExceptionOnDuplicatedId && array_key_exists($entity->{$this->_idField}, $_elementsList)) {
 					throw new Exception(get_class($this) . " getPartialList (apBaseSQLList) found duplicated id values. Id key = '".$this->_idField."' duplicated value = '".$entity->{$this->_idField}."'");
@@ -83,6 +83,8 @@ class apBaseSQLList {
 				$_elementsList[$entity->{$this->_idField}]=$entity;
 			}
 			$this->_totalElements  = $resultCount[0]->total;
+		} else {
+			throw new Exception(get_class($this) . " getPartialList (apBaseSQLList) SQL error:\n\n".$this->_db->getLastErrorMessage());
 		}
 		return $_elementsList;
 	}

@@ -16,4 +16,9 @@ class index extends apControllerTask {
 		$this->responseAjaxData(true,array(), $example->sayHello("apFrameeeeework") );
 	}
 	
+	function xx() {
+	    include (constant('_GLOBAL_MODEL_DIR').'apDatabaseTriggers.php');
+	    apDatabaseTriggers::processAction('UPDATE','TEST','1a');
+	}
+	
 }

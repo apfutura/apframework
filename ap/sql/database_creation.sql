@@ -78,3 +78,20 @@ CREATE TABLE users
   CONSTRAINT fk_user_group FOREIGN KEY (id_group) REFERENCES groups(id)
 );
 insert into users(username, password, id_group) values ('admin', md5('123'), (select id from groups where name = 'admins'));
+
+
+CREATE TABLE "ap_triggers"
+(
+  id serial NOT NULL,
+  action character varying(50),
+  entity character varying(15),
+  key  character varying(15),
+  command text,
+  single_use boolean DEFAULT false,
+  created_on timestamp with time zone DEFAULT now(),
+  created_by character varying(50),
+  modified_on date,
+  modified_by character varying(50),  
+  CONSTRAINT pk_triggers PRIMARY KEY (id),
+  CONSTRAINT "unique triggers" UNIQUE (action, entity, key)
+);

@@ -2,7 +2,7 @@
 // requires config
 // requires apDatabase
 
-include_once(constant('_GLOBAL_MODEL_DIR') . "apApplication.php" );
+//include_once(constant('_GLOBAL_MODEL_DIR') . "apApplication.php" );
 
 class apBaseElement {
 	
@@ -134,10 +134,10 @@ class apBaseElement {
 		foreach ($arrayValues as $value) {
 			if ( $value==null ) {
 				$valuesString .= 'null';
-			} else if ( is_numeric($value) ) {
-				$valuesString .= $value;
+			} else if ( is_string($value) ) {
+			    $valuesString .= $this->_db->quote($value);				
 			} else {
-				$valuesString .= $this->_db->quote($value);
+			    $valuesString .= $value;
 			}
 			$valuesString .= ',';
 		}
@@ -290,6 +290,18 @@ class apBaseElement {
 				$this->$key = $value;
 			} 	
 		}
+	}
+	
+	function getValuesArray() {
+	    $fields = $this->getTableFieldsArray();
+	    $dataArray = array();
+	    foreach ($fields as $field) {
+	        $dataArray[$field] =  $this->$field;
+	    }
+	    foreach ($this->_fieldValueCustomFunctions as $customField) {
+	        $dataArray[$customField] =  $this->_fieldValueCustomFunctions[$customField]();
+	    }	    
+	    return $dataArray;
 	}
 	
 }

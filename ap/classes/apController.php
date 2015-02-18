@@ -53,8 +53,8 @@ class apController {
 			$className = $task;
 			if (method_exists($className,$operation)) {
 				ob_start("self::_mainBootstrapBufferCallback");
-				$controllerObject = new $className($operation);
-				$controllerObject->$operation();
+				$controllerObject = new $className($operation);				
+				if ($controllerObject->initRequisitesMeet()) $controllerObject->$operation();
 				if (is_callable(array($controllerObject, "afterExecuteOperation"))) {
 					$controllerObject->afterExecuteOperation($operation);
 				}				
@@ -63,7 +63,7 @@ class apController {
 				if (method_exists($className,"catchAllOperation")) {
 					ob_start("self::_mainBootstrapBufferCallback");
 					$controllerObject = new $className($operation);
-					$controllerObject->catchAllOperation($operation);
+					if ($controllerObject->initRequisitesMeet()) $controllerObject->catchAllOperation($operation);
 					if (is_callable(array($controllerObject, "afterExecuteOperation"))) {
 						$controllerObject->afterExecuteOperation($operation);
 					}

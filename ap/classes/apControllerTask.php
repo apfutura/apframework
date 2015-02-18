@@ -10,12 +10,17 @@ class apControllerTask {
 	protected $redirectToLogin = true;
 	protected $validationExceptions = array();
 	
+	private $_initRequisitesMeet = true;
+	
 	function __construct($calledOperation) {
 		$this->operation = $calledOperation;
 		$this->task = get_called_class();
 		
 		if (method_exists($this,"onInit")) {
-			$this->onInit($calledOperation);
+			if ($this->onInit($calledOperation)===false) {
+				//$this->_initRequisitesMeet = false;
+				//return;
+			}
 		}
 		if ($this->validateUser && (!in_array($calledOperation,$this->validationExceptions)) ) {
 			if (apSession::validate()) {
@@ -28,6 +33,7 @@ class apControllerTask {
 						$validation = $permissions->check($this->task, $this->operation, $this->user); 
 					}
 					if (!$validation) {
+						$this->_initRequisitesMeet = false;
 						if (method_exists($this,"onPermissionsError")) {
 							$this->onPermissionsError($calledOperation);
 						} else {
@@ -36,6 +42,7 @@ class apControllerTask {
 					}
 				}
 			} else {	
+				$this->_initRequisitesMeet = false;
 				if ($this->redirectToLogin) {
 					$this->redirectToLogin(); // Redirectes and Exits execution
 				} else {
@@ -44,6 +51,10 @@ class apControllerTask {
 			}
 		}
 	}
+	
+	function initRequisitesMeet() {
+		return $this->_initRequisitesMeet;
+	} 
 	
 	function redirectToLogin() {
 		$url = CONFIG::$urlBase . "?task=".apController::getLoginController();

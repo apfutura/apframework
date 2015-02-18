@@ -31,7 +31,7 @@ class apDbPostgresql {
 			return true;
 		} catch(PDOException $e) {
 			$err = new pdoDbException($e);
-			$this->lastError = $err->getMessage();	    	
+			$this->lastError = $err;	    	
 			//UTILS::utils_setMicroTimeSQLEnd("connect... ");
 			return false;
 		}
@@ -119,7 +119,7 @@ class apDbPostgresql {
 		if (!$insensitiveLookup) {
 			$query ='SELECT '.$fieldToReturnValueFrom.' as "getFieldValue" FROM '.$table .' WHERE '. $fieldId."='".$fieldIdValue."'";
 		} else {
-			$query ='SELECT '.$fieldToReturnValueFrom.' as "getFieldValue" FROM '.$table .' WHERE '. $fieldId." ilike '".$fieldIdValue."'";
+			$query ='SELECT '.$fieldToReturnValueFrom.' as "getFieldValue" FROM '.$table .' WHERE '. $fieldId."::varchar ilike '".$fieldIdValue."'";
 		}		
 		//echo  $query;
 		$value=$this->query($query);
@@ -153,18 +153,29 @@ class apDbPostgresql {
 		return  $message;
 	}
 	
-	function getFieldValueEx($table,$where,$expressionToReturnValueFrom,$fieldToReturnValueFrom=null, $returnFirstRecordIfMultipleFound = false) {
-		$query ="SELECT ".$expressionToReturnValueFrom." FROM ".$table ." WHERE ". $where;
+	function getFieldsValueEx($table,$where, $fields, $returnFirstRecordIfMultipleFound = false) {
+		$query ='SELECT '.implode(",",$fields).' FROM '.$table ." WHERE ". $where;
 		$value=$this->query($query);
-		$return = null;		      		
-		if ( ($value) /* array is no empty */ || (count($value) > 1  && $returnFirstRecordIfMultipleFound) )  {
-			if ($fieldToReturnValueFrom!=null) {
-				$return = trim($value[0][$fieldToReturnValueFrom]);
-			} else {
-				$return = trim($value[0][$expressionToReturnValueFrom]);
-			}		
+		$return = null;		     
+		 		
+		if ( ($value) /* array is no empty */ || (count($value) > 1  && $returnFirstRecordIfMultipleFound) ) {
+			$return = $value[0];			
 		}
  		return $return;
+	}
+	
+	function getFieldValueEx($table,$where,$expressionToReturnValueFrom,$fieldToReturnValueFrom=null, $returnFirstRecordIfMultipleFound = false) {
+	    $query ="SELECT ".$expressionToReturnValueFrom." FROM ".$table ." WHERE ". $where;
+	    $value=$this->query($query);
+	    $return = null;
+	    if ( ($value) /* array is no empty */ || (count($value) > 1  && $returnFirstRecordIfMultipleFound) )  {
+	        if ($fieldToReturnValueFrom!=null) {
+	            $return = trim($value[0][$fieldToReturnValueFrom]);
+	        } else {
+	            $return = trim($value[0][$expressionToReturnValueFrom]);
+	        }
+	    }
+	    return $return;
 	}
 	
 	function lastInsertId($column) {

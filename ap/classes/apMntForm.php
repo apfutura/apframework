@@ -7,6 +7,7 @@ class apMntForm {
 	public $urlNavigator	= "";	
 	public $urlEditForm = "";
 	public $urlAddForm = "";
+	public $urlIconsImg	= "";
 	//Ajax urls
 	public $urlRefreshHTML	= "";
 	public $urlInsert = "";
@@ -75,7 +76,9 @@ class apMntForm {
 	
 	function printHtmlTable($offset = 0, $fieldOrderBy = "", $filterAssociativeArray = array(), $return = false, $params = array()) {
 		$limit = $this->maxRegisters;		
-		$records = $this->dataSource->getPartialList($offset, $limit, $fieldOrderBy,$filterAssociativeArray);		
+		$filterWhere = null;
+		if (isset($params["filterWhere"])) $filterWhere = $params["filterWhere"];
+		$records = $this->dataSource->getPartialList($offset, $limit, $fieldOrderBy,$filterAssociativeArray, $filterWhere );		
 		$recordsCount = $this->dataSource->getTotalElements();
 		
 		if ($offset>$recordsCount ) $offset=0; 
@@ -83,7 +86,7 @@ class apMntForm {
 		if ($this->urlAddForm!="") {
 			$html .= '<div><a href="'.$this->urlAddForm.'" class="button">{$L_ADD}</a></div><br />';
 		}
-		$html .= '<table id="entities" data-table="'.$this->table.'" data-fieldOrderBy="'.$fieldOrderBy.'" data-filter="' .htmlspecialchars(json_encode($filterAssociativeArray)).'" data-urlRefreshHTML="' .htmlspecialchars($this->urlRefreshHTML).'"  data-urlEditForm="' .htmlspecialchars($this->urlEditForm).'"  data-urlUpdate="' .htmlspecialchars($this->urlUpdate).'"  data-urlDelete="' .htmlspecialchars($this->urlDelete).'" class="ui-widget ui-widget-content"><thead>
+		$html .= '<table id="entities" data-table="'.$this->table.'" data-fieldOrderBy="'.$fieldOrderBy.'" data-filter="' .htmlspecialchars(json_encode($filterAssociativeArray)).'" data-urlRefreshHTML="' .htmlspecialchars($this->urlRefreshHTML).'"  data-urlEditForm="' .htmlspecialchars($this->urlEditForm).'"  data-urlUpdate="' .htmlspecialchars($this->urlUpdate).'"  data-urlDelete="' .htmlspecialchars($this->urlDelete).'" class="ui-widget ui-widget-content entities"><thead>
 			<tr class="ui-widget-header ">';
 
 		$fields = $this->getFields();
@@ -109,10 +112,10 @@ class apMntForm {
 		}
 
 		$html .= '</tbody></table>';
-		$navigatorOptions = array("offsetVarName" => $this->table . "Offset",  "ajaxPopulateElement" => 'entities_wrapper_'.$this->table);
+		$navigatorOptions = array("offsetVarName" => $this->table . "Offset",  "ajaxPopulateElement" => 'entities_wrapper_'.$this->table, "urlBaseIMG" => $this->urlIconsImg);
 		if (isset($params["ajaxLoad"])) $navigatorOptions["ajaxLoad"] = true;
 		$html .= apHtmlUtils::htmlNavigator($this->urlNavigator, $offset, $limit, $recordsCount , count($records), $navigatorOptions);
-		$html .= '<script type="text/javascript" src="{$C_urlBase}js/?apMntForm.js"></script></span>';
+		$html .= '<script type="text/javascript" src="{$C_urlBaseJS}/?apMntForm.js"></script></span>';
 		
 		if (!$return) echo $html; else return apRender::replaceTemplateVars($html, array());
 	}
@@ -165,7 +168,7 @@ class apMntForm {
 			$html .= apHtmlUtils::inputHtml("id", $record->id, false,false); 
 		}
 		$html .= '</fieldset><div> <button id="'.( $record==null ? "insertEntity" : "editEntity").'">{$L_SAVE}</button><button id="cancelInsertEntity">{$L_CANCEL}</button></div>';
-		$html .= '<script type="text/javascript" src="{$C_urlBase}js/?apMntForm.js"></script>';
+		$html .= '<script type="text/javascript" src="{$C_urlBaseJS}/?apMntForm.js"></script>';
 	
 		if (!$return) echo $html; else return apRender::replaceTemplateVars($html);
 	}

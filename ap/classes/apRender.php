@@ -91,7 +91,6 @@ class apRender {
 	}
 	
 	static public function replaceTemplateVars($templateRenderedContents,$KeyValueList, $htmlEntities = false, $emptyVars = true) {
-			
 	
 		/*	$templateRenderedContents = str_replace('{$USER_CURRENT}', ApexUser::getCurrentLoggedUserName(), $templateRenderedContents);
 		 $templateRenderedContents = str_replace('{$URL_CURRENT}', $_SERVER['PHP_SELF'], $templateRenderedContents);
@@ -140,35 +139,60 @@ class apRender {
 			$templateRenderedContents = str_replace('{$'.$constant.'}',$constantValue,$templateRenderedContents);
 		}
 	
-		$start_pos = strpos($templateRenderedContents,'{$CDB_',0);
+	$start_pos = strpos($templateRenderedContents,'{$CDB_',0);
 		$configDataBaseConstants = array();
 		while ($start_pos!==false) {
-			$end_pos = strpos($templateRenderedContents,"}",$start_pos);
-			$configDataBaseConstants[] = substr($templateRenderedContents,$start_pos + 6,$end_pos-$start_pos-6);
+
+			$nestedStarts = strpos($templateRenderedContents,'{$',$start_pos +1 );
+			$end_pos = strpos($templateRenderedContents,"}",$start_pos  + 1);
+			$last_end = $end_pos; 
+			
+			while ($nestedStarts!==false && $nestedStarts<$end_pos) {
+				$last_end = strpos($templateRenderedContents,"}",$end_pos + 1);
+				$nestedStarts = strpos($templateRenderedContents,'{$',$nestedStarts + 1);				
+			}										 										
+			
+			$configDataBaseConstants[] = substr($templateRenderedContents,$start_pos + 6,$last_end-$start_pos-6);			
 			//echo substr($templateRenderedContents,$start_pos + 6,$end_pos-$start_pos-6)."-------";
-			$start_pos = strpos($templateRenderedContents,'{$CDB_',$end_pos + 1);
+			$start_pos = strpos($templateRenderedContents,'{$CDB_',$last_end + 1);
 		}
+		
 		foreach ($configDataBaseConstants as $constant) {
 			$configDatabaseData = explode("|", $constant);
 			$defaultValue = null;
 			if ( isset($configDatabaseData[2]) ) $defaultValue = $configDatabaseData[2];
-			$constantValue = apexConfig::get($configDatabaseData[1], $configDatabaseData[0], $defaultValue , false );
-			$templateRenderedContents = str_replace('{$CDB_'.$constant.'}',$constantValue,$templateRenderedContents);
+			
+			$group  = $configDatabaseData[0];
+			$evaluatedGroup = self::replaceTemplateVars($group , $KeyValueList, $htmlEntities, true );
+			
+			$variable = $configDatabaseData[1];
+			$evaluatedVariable = self::replaceTemplateVars($variable , $KeyValueList, $htmlEntities, true );
+			
+			$constantValue = apexConfig::get($evaluatedVariable, $evaluatedGroup, $defaultValue , false );
+			$templateRenderedContents = str_replace('{$CDB_'.$constant.'}', $constantValue ,$templateRenderedContents);
 		}
 	
 		
 		// Process {$IF} as object config static properties		
-		$start_pos = strpos($templateRenderedContents,'{$IF',0);
+		$start_pos = strpos($templateRenderedContents,'{$IF ',0);
 		$ini_pos = 0;
 		$x=0;
 		while ($start_pos!==false ) {
+		    
 			$x++;
 			$end_pos = strpos($templateRenderedContents,'THEN}',$start_pos);
 			$pos_else = strpos($templateRenderedContents,'{$ELSE}',$end_pos);
 			$endif_pos = strpos($templateRenderedContents,'{$ENDIF}',$end_pos);
+			$nextif_pos = strpos($templateRenderedContents,'{$IF ',$end_pos);
 			$thereisElse = ($pos_else  != false) && ($pos_else < $endif_pos);  
-					
-			if ($end_pos !=false && $endif_pos!=false) {				
+			$thereisAnnidatedIf = ($nextif_pos? ($nextif_pos < $endif_pos) : false);
+			
+			/*IF ($thereisAnnidatedIf) {
+			    $insideIf = substr($templateRenderedContents,$nextif_pos,$endif_pos);
+			    $evaluatedContent .= self::replaceTemplateVars($insideIf, $KeyValueList, $htmlEntities, $emptyVars);
+			}*/			
+			
+			if ($end_pos !=false && $endif_pos!=false && $thereisAnnidatedIf==false) {				
 				$condition = substr($templateRenderedContents,$start_pos + 5,$end_pos-$start_pos-5);
 				if ($thereisElse) {
 					$insideif = substr($templateRenderedContents,$end_pos + 5,$pos_else-$end_pos-5);
@@ -191,9 +215,14 @@ class apRender {
 				$b = $evaluatedContent;
 				$c = substr($templateRenderedContents, $endif_pos + 8);
 				$templateRenderedContents = $a.$b.$c;
+			} else {
+			    if ($thereisAnnidatedIf) throw new Exception('apRender syntax error: annidated IF not supported');
+			    if (!$end_pos) throw new Exception('apRender syntax error: IF without THEN}');
+			    if (!$endif_pos) throw new Exception('apRender syntax error: IF without {$ENDIF}');
+			    if ($end_pos && ($end_pos>$pos_else  || $end_pos>$endif_pos) ) throw new Exception('apRender syntax error: IF without ENDIF or incorrect}');
 			}
 			$ini_pos = $start_pos;
-			$start_pos = strpos($templateRenderedContents,'{$IF',0);
+			$start_pos = strpos($templateRenderedContents,'{$IF ',0);
 		}
 		
 		
@@ -231,6 +260,61 @@ class apRender {
 			}
 			$ini_pos = $start_pos;
 			$start_pos = strpos($templateRenderedContents,'{$FOREACH',0);
+		}
+		
+
+		// Process {$IF2} as object config static properties
+		$start_pos = strpos($templateRenderedContents,'{$IF2',0);
+		$ini_pos = 0;
+		$x=0;
+		while ($start_pos!==false ) {
+		
+		    $x++;
+		    $end_pos = strpos($templateRenderedContents,'THEN}',$start_pos);
+		    $pos_else = strpos($templateRenderedContents,'{$ELSE2}',$end_pos);
+		    $endif_pos = strpos($templateRenderedContents,'{$ENDIF2}',$end_pos);
+		    $nextif_pos = strpos($templateRenderedContents,'{$IF',$end_pos);
+		    $nextif2_pos = strpos($templateRenderedContents,'{$IF2',$end_pos);
+		    $thereisElse = ($pos_else  != false) && ($pos_else < $endif_pos);
+		    $thereisAnnidatedIf = ($nextif_pos? ($nextif_pos < $endif_pos) : false);
+		    $thereisAnnidatedIf = ($thereisAnnidatedIf?true:($nextif2_pos? ($nextif2_pos < $endif_pos) : false));
+		     
+		    /*IF ($thereisAnnidatedIf) {
+		     $insideIf = substr($templateRenderedContents,$nextif_pos,$endif_pos);
+		    $evaluatedContent .= self::replaceTemplateVars($insideIf, $KeyValueList, $htmlEntities, $emptyVars);
+		    }*/
+		     
+		    if ($end_pos !=false && $endif_pos!=false && $thereisAnnidatedIf==false) {
+		        $condition = substr($templateRenderedContents,$start_pos + 5,$end_pos-$start_pos-6);
+		        if ($thereisElse) {
+		            $insideif = substr($templateRenderedContents,$end_pos + 5,$pos_else-$end_pos-6);
+		            $insideelse = substr($templateRenderedContents,$pos_else + 7,$endif_pos-$pos_else-8);
+		        } else {
+		            $insideif = substr($templateRenderedContents,$end_pos + 5,$endif_pos-$end_pos - 6);
+		            $insideelse ="";
+		        }
+		
+		        $evaluatedCondition = self::replaceTemplateVars($condition,$KeyValueList, $htmlEntities, $emptyVars );
+		        $test = eval('return ' . $evaluatedCondition.";");
+		         
+		        if (!$test) {
+		            $evaluatedContent = self::replaceTemplateVars($insideelse ,$KeyValueList, $htmlEntities, $emptyVars);
+		        } else {
+		            $evaluatedContent = self::replaceTemplateVars($insideif ,$KeyValueList, $htmlEntities, $emptyVars);
+		        }
+		        //@ob_end_clean();
+		        $a = substr($templateRenderedContents, 0, $start_pos);
+		        $b = $evaluatedContent;
+		        $c = substr($templateRenderedContents, $endif_pos + 9);
+		        $templateRenderedContents = $a.$b.$c;
+		    } else {
+		        if ($thereisAnnidatedIf) throw new Exception('apRender syntax error: annidated IF or IF2 not supported');
+		        if (!$end_pos) throw new Exception('apRender syntax error: IF2 without THEN}');
+		        if (!$endif_pos) throw new Exception('apRender syntax error: IF2 without {$ENDIF2}');
+		        if ($end_pos && ($end_pos>$pos_else  || $end_pos>$endif_pos) ) throw new Exception('apRender syntax error: IF2 without ENDIF2 or incorrect}');
+		    }
+		    $ini_pos = $start_pos;
+		    $start_pos = strpos($templateRenderedContents,'{$IF2',0);
 		}
 		
 		

@@ -89,10 +89,11 @@ class apConfig
 	}
 	
 	
-	protected function getConfigGroupValues($varGroup) {
+	protected function getConfigGroupValues($varGroup, $orderByVarName = null) {
+                $order = $orderByVarName ? " ORDER BY var_name" : '';
 		$valueCache = apCache::load($varGroup."_values");
 		if ($valueCache==false) {
-			$sql = sprintf('SELECT var_name, var_value FROM ' . $this->_configTable . " WHERE var_group='%s'"/* ORDER BY var_name"*/,$varGroup);
+			$sql = sprintf('SELECT var_name, var_value FROM ' . $this->_configTable . " WHERE var_group='%s'" . $order, $varGroup);
 			echo $sql;
 			$return  = array();
 			$result = $this->_db->query($sql);
@@ -128,9 +129,9 @@ class apConfig
     }
     
     
-	static function getGroup($varGroup) {
+    static function getGroup($varGroup, $orderByVarName = null) {
     	$instance = self::getInstance();
-    	$result = $instance->getConfigGroupValues($varGroup);
+    	$result = $instance->getConfigGroupValues($varGroup, $orderByVarName);
         return $result;
     }
     

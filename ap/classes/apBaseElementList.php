@@ -2,7 +2,7 @@
 // requires config
 // requires apDatabase
 
-include_once(constant('_GLOBAL_MODEL_DIR') . "apApplication.php" );
+//include_once(constant('_GLOBAL_MODEL_DIR') . "apApplication.php" );
 
 class apBaseElementList {
 	
@@ -52,7 +52,7 @@ class apBaseElementList {
 		$this->_elementsListLoaded = true;
 	}
 	
-	public function getPartialList($offset = null, $limit = null, $fieldOrderBy = null, $filterAssociativeArray = array()) {
+	public function getPartialList($offset = null, $limit = null, $fieldOrderBy = null, $filterAssociativeArray = array(), $filterWhere = null) {
 		$sqlLimit = "";
 		$sqlWhere = "";
 	
@@ -67,13 +67,27 @@ class apBaseElementList {
 		$arrayConditions[] = '1=1';
 	
 		foreach ($filterAssociativeArray as $field => $value ) {
-			$arrayConditions[] = $field . " = '".$value."'";
+			$not = '';
+			if (strpos($value, '%') === false) {
+				if (substr($field, 1) == '!') $not = '!';
+				$arrayConditions[] = $field . " $not= '".$value."'";
+			} else {
+				if (substr($field, 0, 1) == '!') {
+					$not = 'NOT';
+					$field = ltrim ($field ,'!');
+				}
+				$arrayConditions[] = $field . " " . $not. " ILIKE '".$value."'";
+			}			
 		}
-	
+		
 		if (count($arrayConditions)>0){
 			$sqlWhere = " WHERE ".implode(' AND ',$arrayConditions);
 		} else {
 			$sqlWhere = '';
+		}
+
+		if ($filterWhere) {
+			$sqlWhere .= ' AND ' . $filterWhere;
 		}
 		
 		if (is_null($fieldOrderBy) ) {
@@ -81,9 +95,9 @@ class apBaseElementList {
 		}
 		$sqlOrderBy = " ORDER BY " . $fieldOrderBy;
 	
-		$SQL = sprintf ("SELECT * FROM ". $this->_dbtable .$sqlWhere.$sqlOrderBy.$sqlLimit );
-		//echo $SQL;die();
-		$SQLCount = sprintf ("SELECT count(*) as total FROM ".$this->_dbtable.$sqlWhere);
+		$SQL = "SELECT * FROM ". $this->_dbtable .$sqlWhere.$sqlOrderBy.$sqlLimit;
+		//echo $SQL ; die();
+		$SQLCount = "SELECT count(*) as total FROM ".$this->_dbtable.$sqlWhere;
 		$result = $this->_db->query($SQL,PDO::FETCH_ASSOC);
 		$resultCount = $this->_db->query($SQLCount,PDO::FETCH_OBJ);
 		$_elementsList = array();

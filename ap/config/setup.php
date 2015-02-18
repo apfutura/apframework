@@ -21,11 +21,11 @@ class CONFIG {
 	 */
 	
 	/* DB Server ****************************************/	
-	public static $useDb=false;
+	public static $useDb=true;
 	public static $server='localhost';
-	public static $db='';
+	public static $db='apex_barcelona_02';
 	public static $user='postgres';
-	public static $pass='';
+	public static $pass='arr147';
 	public static $port=5432;
 	public static $logQueriesToApache = false; 	
 	

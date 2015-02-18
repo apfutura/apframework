@@ -284,7 +284,7 @@ function getIP() {
 }
 
 
-function exportAsociativeArrayToXLS($array,$filename, $utf8 = false){
+function exportAsociativeArrayToXLS($array,$filename, $utf8 = false, $separator = null){
 	header("Content-Disposition: attachment; filename=\"$filename\"");
 	$charset = "";
 	if (!$utf8) $charset = " charset: iso-8859-1";
@@ -293,7 +293,11 @@ function exportAsociativeArrayToXLS($array,$filename, $utf8 = false){
 	foreach ($array as $row) {
 		if(!$flag) {
 			# display field/column names as first row
-			$headerStr = implode("\t", array_keys($row)) . "\r\n";
+			if ($separator) {
+			    $headerStr = implode($separator, array_keys($row)) . "\r\n";
+			} else {
+                $headerStr = implode("\t", array_keys($row)) . "\r\n";
+			}
 			if (!$utf8) $headerStr = utf8_decode($headerStr);
 			echo $headerStr;
 			$flag = true;
@@ -306,8 +310,11 @@ function exportAsociativeArrayToXLS($array,$filename, $utf8 = false){
 				
 				}
 		);
-		
-		echo implode("\t", array_values($row)) . "\r\n";
+		if ($separator) {
+		    echo implode($separator, array_values($row)) . "\r\n";
+		} else {
+            echo implode("\t", array_values($row)) . "\r\n";
+		}
 	}
 }
 
