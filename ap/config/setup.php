@@ -8,7 +8,7 @@ class CONFIG {
 	public static $urlBaseJS = 'http://{$URL_HOST}/js';
 	public static $urlBaseCSS = 'http://{$URL_HOST}/css';
 	public static $urlBaseIMG = 'http://{$URL_HOST}/img';
-	public static $avaliableLanguages = array("en" => "English","ca" => "Català", "es" => "Español");
+	public static $avaliableLanguages = array("en" => "English"); // E.g array("en" => "English", "ca" => "Català", "es" => "Español");
 	public static $defaultLang = 'en';
 	public static $timeZone = 'Europe/Andorra';
 	
@@ -23,9 +23,9 @@ class CONFIG {
 	/* DB Server ****************************************/	
 	public static $useDb=true;
 	public static $server='localhost';
-	public static $db='apex_barcelona_02';
-	public static $user='postgres';
-	public static $pass='arr147';
+	public static $db='[DB]';
+	public static $user='[DBUSER]';
+	public static $pass='[DBPASS]';
 	public static $port=5432;
 	public static $logQueriesToApache = false; 	
 	
