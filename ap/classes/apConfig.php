@@ -94,7 +94,7 @@ class apConfig
 		$valueCache = apCache::load($varGroup."_values");
 		if ($valueCache==false) {
 			$sql = sprintf('SELECT var_name, var_value FROM ' . $this->_configTable . " WHERE var_group='%s'" . $order, $varGroup);
-			echo $sql;
+			//echo $sql;
 			$return  = array();
 			$result = $this->_db->query($sql);
 			foreach ($result as $row) {

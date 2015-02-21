@@ -7,6 +7,7 @@
 class apBaseElementList {
 	
 	protected $_elementClass;
+	protected $_elementClassContructParam;
 	protected $_totalElements = 0;
 	protected $_elementsList = array();
 	protected $_elementsListLoaded = false;
@@ -101,13 +102,20 @@ class apBaseElementList {
 		$result = $this->_db->query($SQL,PDO::FETCH_ASSOC);
 		$resultCount = $this->_db->query($SQLCount,PDO::FETCH_OBJ);
 		$_elementsList = array();
-		if ($result!=false) {
+		if ($result!==false) {
 			foreach ($result as $entity) {
-				$tempEntity=new $this->_elementClass;
+			    if ($this->_elementClassContructParam!= null) {
+			        $tempEntity=new $this->_elementClass($this->_elementClassContructParam);			        
+			    } else {
+			        $tempEntity=new $this->_elementClass;			        
+			    }
+				
 				$tempEntity->loadFromArray($entity);
 				$_elementsList[$entity[$this->_idField]]=$tempEntity;
 			}
 			$this->_totalElements  = $resultCount[0]->total;
+		} else {
+		    throw new Exception('apBaseElementList: getPartialList SQL error executing '. $SQL);
 		}
 		return $_elementsList;
 	}
@@ -138,6 +146,10 @@ class apBaseElementList {
 	
 	public function setOrderField($orderField) {
 		$this->_orderField = $orderField;
+	}
+	
+	public function setElementClassContructParam($param) {
+	    $this->_elementClassContructParam= $param;
 	}
 	
 }
