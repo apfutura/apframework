@@ -3,6 +3,7 @@ namespace apUtils;
 const PARAM_RAW = 1;
 const PARAM_INT = 2;
 const PARAM_ESCAPED_STRING = 3;
+const PARAM_FLOAT = 4;
 
 function bytesToSize1024($bytes, $precision = 2)
 {
@@ -243,6 +244,9 @@ function getParam( &$arr, $name, $def=null, $dataType = PARAM_RAW ) {
 		case constant('apUtils\PARAM_INT'):
 			$value = intval($value);
 			break;
+		case constant('apUtils\PARAM_FLOAT'):
+		    $value = floatval($value);
+		    break;			
 		case constant('apUtils\PARAM_ESCAPED_STRING'):
 			$value = htmlspecialchars($value, ENT_QUOTES,'UTF-8');
 			break;

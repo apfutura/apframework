@@ -82,7 +82,7 @@ class apMntForm {
 		$recordsCount = $this->dataSource->getTotalElements();
 		
 		if ($offset>$recordsCount ) $offset=0; 
-		$html = '<span id="entities_wrapper_'.$this->table.'"><style>th[data-field] {background-image:url( "{$C_urlBase}images/icons/az.gif");background-repeat:no-repeat;background-position: 4px center;	min-width: 45px;}</style>';
+		$html = '<span id="entities_wrapper_'.$this->table.'"><style>table.entities  { margin: auto; min-width: 320px;} th[data-field] {background-image:url( "{$C_urlBase}images/icons/az.gif");background-repeat:no-repeat;background-position: 4px center;	min-width: 45px;}</style>';
 		if ($this->urlAddForm!="") {
 			$html .= '<div><a href="'.$this->urlAddForm.'" class="button">{$L_ADD}</a></div><br />';
 		}
