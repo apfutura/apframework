@@ -2,6 +2,7 @@
 namespace apUtils;
 const PARAM_RAW = 1;
 const PARAM_INT = 2;
+const PARAM_STRING = 3;
 const PARAM_ESCAPED_STRING = 3;
 const PARAM_FLOAT = 4;
 
@@ -508,4 +509,22 @@ function forceUTF8($text) {
 	}
 	
 	return $buf;
+}
+
+function instanceNewObject($className, $args=array() ) {
+    if (is_string($className)==false) {
+        $backtrace = debug_backtrace();
+        $callingMethod = '';
+        if (!empty($backtrace[5])) $callingMethod .= $backtrace[5]['file'].":".$backtrace[5]['function']."() ";
+        if (!empty($backtrace[4])) $callingMethod .= $backtrace[4]['file'].":".$backtrace[4]['function']."() ";
+        if (!empty($backtrace[3])) $callingMethod .= $backtrace[3]['file'].":".$backtrace[3]['function']."() ";
+        if (!empty($backtrace[2])) $callingMethod .= $backtrace[2]['file'].":".$backtrace[2]['function']."() ";
+        throw new \Exception("instanceNewObject without a valid classname. Backtrace: " . $callingMethod );
+    }
+    if(empty($args))
+        return new $className();
+    else {
+        $ref = new \ReflectionClass($className);
+        return $ref->newInstanceArgs($args);
+    }
 }

@@ -7,7 +7,7 @@
 class apBaseElementList {
 	
 	protected $_elementClass;
-	protected $_elementClassContructParam;
+	protected $_elementClassContructParams = array();
 	protected $_totalElements = 0;
 	protected $_elementsList = array();
 	protected $_elementsListLoaded = false;
@@ -104,12 +104,7 @@ class apBaseElementList {
 		$_elementsList = array();
 		if ($result!==false) {
 			foreach ($result as $entity) {
-			    if ($this->_elementClassContructParam!= null) {
-			        $tempEntity=new $this->_elementClass($this->_elementClassContructParam);			        
-			    } else {
-			        $tempEntity=new $this->_elementClass;			        
-			    }
-				
+			    $tempEntity = apUtils\instanceNewObject($this->_elementClass, $this->_elementClassContructParams);
 				$tempEntity->loadFromArray($entity);
 				$_elementsList[$entity[$this->_idField]]=$tempEntity;
 			}
@@ -148,8 +143,18 @@ class apBaseElementList {
 		$this->_orderField = $orderField;
 	}
 	
+	public function setElementClassContructParams($params) {
+	    if (is_array($params)) {
+	        $this->_elementClassContructParams= $params;
+	    } else if ($params!=null){
+	        $this->_elementClassContructParams[] = $params;
+	    }
+	}
+	
 	public function setElementClassContructParam($param) {
-	    $this->_elementClassContructParam= $param;
+	    if ($param!=null){
+	        $this->_elementClassContructParams[] = $param;
+	    }
 	}
 	
 }
