@@ -13,6 +13,7 @@ class apBaseElement {
 	protected $_elementType;
 	protected $_elementFields;
 	protected $_fieldValueCustomFunctions = array();
+        protected $_transformStringNullToSQLNull = false;        
 
 	public $lastSQL;
 	
@@ -173,6 +174,14 @@ class apBaseElement {
 	public function getElementIdField() {
 		return strtolower($this->_idField);
 	}
+        
+                public function getTranformStringNullToSQLNull() {
+            return $this->_transformStringNullToSQLNull;
+        }
+        
+        public function setTranformStringNullToSQLNull($bool = false) {
+            $this->_transformStringNullToSQLNull = $bool;
+        }
 	
 	public function update($data, $where=null, $forceUpdateOnAllFields = false, &$affectedFields) {
 		$ok=false;
