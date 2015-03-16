@@ -424,13 +424,13 @@ function exportTableToCsv($exportFile, $table, $fields = null /* array */, $limi
 }
 
 
-function exportArrayToCsv($exportFile, $rowsArray, $onlyHeaders = false) {
+function exportArrayToCsv($exportFile, $rowsArray, $onlyHeaders = false, $stringDelimiter = ',') {
 
 	$fp = fopen($exportFile, 'w');
 	$firstRegister = true;
 	foreach ($rowsArray as $row) {
 		if ($firstRegister) {
-			fputcsv($fp, array_keys($row));
+			fputcsv($fp, array_keys($row), $stringDelimiter);
 			$firstRegister = false;
 			if ($onlyHeaders) break;
 		}
