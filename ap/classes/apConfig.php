@@ -63,11 +63,11 @@ class apConfig
 			$str_where_group = ($varGroup == null?'':" AND var_group='".$varGroup."'");
 			$value = $this->_db->getFieldValueEx($this->_configTable,"var_name='".$varKey."'".$str_where_group,'var_name');
 			if ($value == null) { 
-				apLog::sendWarning("GetConfig", "Configuration Key: $varKey / Group: $varGroup is empty");
+				//apLog::sendWarning("GetConfig", "Configuration Key: $varKey / Group: $varGroup is empty");
 				if ($autoCreate == true) {
 					$sql = 'INSERT INTO ' . $this->_configTable . "(var_name,var_value,".($varGroup==null?'':'var_group,')."created_on,created_by) VALUES ('".$varKey."','".$varDefaultValue."',".($varGroup==null?'':"'".$varGroup."',")."now(),'".$this->_user."');";
 					$this->_db->exec($sql);;
-					apLog::sendWarning("GetConfig", "setup.php 'autocreateConfigOptions' is set to 'true'. Creating Configuration Key: $varKey / Group: $varGroup with value: $varDefaultValue");
+					//apLog::sendWarning("GetConfig", "setup.php 'autocreateConfigOptions' is set to 'true'. Creating Configuration Key: $varKey / Group: $varGroup with value: $varDefaultValue");
 				}
 				if ($varDefaultValue!=null) {
 					$value = $varDefaultValue;

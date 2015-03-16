@@ -2,9 +2,12 @@
 namespace apUtils;
 const PARAM_RAW = 1;
 const PARAM_INT = 2;
+const PARAM_INTEGER = 2;
+const PARAM_STR = 3;
 const PARAM_STRING = 3;
 const PARAM_ESCAPED_STRING = 3;
 const PARAM_FLOAT = 4;
+const PARAM_FLT = 4;
 
 function bytesToSize1024($bytes, $precision = 2)
 {
@@ -246,7 +249,7 @@ function getParam( &$arr, $name, $def=null, $dataType = PARAM_RAW ) {
 			$value = intval($value);
 			break;
 		case constant('apUtils\PARAM_FLOAT'):
-		    $value = floatval($value);
+		    $value = floatvalLocalized($value);
 		    break;			
 		case constant('apUtils\PARAM_ESCAPED_STRING'):
 			$value = htmlspecialchars($value, ENT_QUOTES,'UTF-8');
@@ -288,6 +291,10 @@ function getIP() {
 	return($ip);
 }
 
+function floatvalLocalized($val) {
+    return floatval(str_replace(',', '.', str_replace('.', '',$val)));
+} 
+ 
 
 function exportAsociativeArrayToXLS($array,$filename, $utf8 = false, $separator = null){
 	header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -332,6 +339,13 @@ function getDMYDateFromYMDDate($dateString) {
 	return $return;
 }
 
+function getDMYTimestampFromYMDTimestamp($dateString) {
+    $return = "";
+    if (strlen($dateString)>0) {
+        $return = date("d/m/Y H:m",strtotime($dateString));
+    }
+    return $return;
+}
 
 function importCsv($file, $elementType, $fields = array()) {
 	
