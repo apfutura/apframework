@@ -119,5 +119,9 @@ class apControllerTask {
 	function getOperation() {
 		return $this->operation;
 	}
+        
+        function getTask() {
+		return $this->task;
+	}
 	
 }
