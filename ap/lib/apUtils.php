@@ -542,3 +542,48 @@ function instanceNewObject($className, $args=array() ) {
         return $ref->newInstanceArgs($args);
     }
 }
+
+function copyFolderRecursively($src,$dst) { 
+    $dir = opendir($src); 
+    @mkdir($dst, 0777, true); 
+    while(false !== ( $file = readdir($dir)) ) { 
+        if (( $file != '.' ) && ( $file != '..' ) && ( !strpos($file, '.php') ) ){ 
+            if ( is_dir($src . '/' . $file) ) { 
+                copyFolderRecursively($src . '/' . $file,$dst . '/' . $file); 
+            } 
+            else { 
+                copy($src . '/' . $file,$dst . '/' . $file); 
+            } 
+        } 
+    } 
+    closedir($dir); 
+} 
+
+function deleteEmptyDirRecursively($dir) {
+    if (!is_readable($dir)) {
+        return NULL;
+    }
+    $handle = opendir($dir);
+    while (false !== ($entry = readdir($handle))) {
+        if ($entry != "." && $entry != "..") {
+            if (isDirRecursivelyEmpty($dir.$entry)) {
+                rrmdir($dir.$entry);
+            }
+        }
+    }
+}
+
+function isDirRecursivelyEmpty($dir) {
+    if (!is_readable($dir)) return NULL;
+    $handle = opendir($dir);
+    while (false !== ($entry = readdir($handle))) {
+        if ($entry != "." && $entry != "..") {
+            if (!is_dir($dir.'/'.$entry)) {
+                return FALSE;
+            } else if ((is_dir($dir.'/'.$entry) && !isDirRecursivelyEmpty($dir.'/'.$entry))) {
+                return FALSE;
+            }
+        }
+    }
+    return TRUE;
+}
