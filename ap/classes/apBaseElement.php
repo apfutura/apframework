@@ -133,7 +133,7 @@ class apBaseElement {
 		$arrayValues = array_values($data_specific);
 		$valuesString = '';
 		foreach ($arrayValues as $value) {
-			if ( $value==null ) {
+			if ( $value==null || (strtolower($value)=="null" && $this->getTranformStringNullToSQLNull()==true) ) {
 				$valuesString .= 'null';
 			} else if ( is_string($value) ) {
 			    $valuesString .= $this->_db->quote($value);				
@@ -145,7 +145,8 @@ class apBaseElement {
 		$valuesString = substr($valuesString , 0, -1);
 		 
 		$SQL=sprintf("INSERT INTO %s (%s) values(%s)",$this->_dbtable ,implode(',',array_keys($data_specific)), $valuesString );
-		//echo $SQL."<br>"; die();
+		echo $SQL."<br>\n";
+		
 		$affected_rows = $this->_db->exec($SQL);
 		//echo $this->_dbtable.":".$affected_rows."<br>";
 		if ($affected_rows>0) {
@@ -188,7 +189,7 @@ class apBaseElement {
 		//Extract "element" data, the rest will be "table specficic" data
 		foreach ($data as $k => $d) {
 			if ( trim($d) != trim($this->{$k}) || $forceUpdateOnAllFields ) {
-				if (($d=='') ||($d==null) ) {
+				if (($d=='') ||($d==null) || (strtolower($d)=="null" && $this->getTranformStringNullToSQLNull()==true)) {
 					$d = "null";
 				} else {
 					$fType = apDatabase::getFieldType($this->_dbtable,$k );
