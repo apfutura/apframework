@@ -145,7 +145,7 @@ class apBaseElement {
 		$valuesString = substr($valuesString , 0, -1);
 		 
 		$SQL=sprintf("INSERT INTO %s (%s) values(%s)",$this->_dbtable ,implode(',',array_keys($data_specific)), $valuesString );
-		echo $SQL."<br>\n";
+//		echo $SQL."<br>\n";
 		
 		$affected_rows = $this->_db->exec($SQL);
 		//echo $this->_dbtable.":".$affected_rows."<br>";
@@ -154,7 +154,8 @@ class apBaseElement {
 				$id_specific = $this->getDB()->lastInsertId($this->_dbSequence);
 			} catch (Exception $e) {
 				$id_specific = $data[$this->_idField];
-				throw new exception('Couldnt get la inserted Id: Missing sequence ' . $this->_dbSequence .' and _idField "'.$this->_idField.'" is has not beed passed in');
+                                //TODO: figure out how to populate id_speific nicely when the idfield is not auto incremeted
+//				throw new exception('Couldnt get la inserted Id: Missing sequence ' . $this->_dbSequence .' and _idField "'.$this->_idField.'" is has not beed passed in');
 			}			
 			$ok=true;
 		}
@@ -215,6 +216,7 @@ class apBaseElement {
 		}
 		
 		$SQL=sprintf("UPDATE %s SET %s WHERE %s",$this->getElementTable(), implode(',',$data_specific), $where);
+//                echo $SQL."<br>\n";
 		$affected_rows = $this->_db->exec($SQL);
 
 		if ($affected_rows==1) {
@@ -234,7 +236,7 @@ class apBaseElement {
 		
 		$fType = apDatabase::getFieldType($this->_dbtable,$this->_idField);		
 		if ($id==null) {
-			if ($this->{$this->_idField}==null) {		
+			if ($this->{$this->_idField}==null) {	
 				return false;
 			}			
 			$id = $this->{$this->_idField};
@@ -246,8 +248,8 @@ class apBaseElement {
 			$where = sprintf($this->_idField."='%s'", $id);
 		}
 		
-		$SQL=sprintf("DELETE FROM %s WHERE %s",$this->getElementTable(), $where);		
-		$this->lastSQL = $SQL;
+		$SQL=sprintf("DELETE FROM %s WHERE %s",$this->getElementTable(), $where);	
+                $this->lastSQL = $SQL;
 		$affected_rows = $this->_db->exec($SQL);
 		if ($affected_rows>0) {
 			$ok=true;
