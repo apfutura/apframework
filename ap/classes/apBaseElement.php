@@ -136,7 +136,7 @@ class apBaseElement {
 			if ( $value==null || (strtolower($value)=="null" && $this->getTranformStringNullToSQLNull()==true) ) {
 				$valuesString .= 'null';
 			} else if ( is_string($value) ) {
-			    $valuesString .= $this->_db->quote($value);				
+			    $valuesString .= $this->_db->quote($value);
 			} else {
 			    $valuesString .= $value;
 			}

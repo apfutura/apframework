@@ -37,6 +37,14 @@ class apBaseElementList {
 		return $this->_elementsList;
 	}
 	
+	public function getListValuesArray() {
+		$dataArray = array();
+		foreach ($this->getList() as $element) {
+			$dataArray[] =  $element->getValuesArray();
+		}
+		return $dataArray;
+	}
+	
 	protected function _loadElements() {
 		$this->_elementsList = array();
 	
@@ -113,6 +121,15 @@ class apBaseElementList {
 		    throw new Exception('apBaseElementList: getPartialList SQL error executing '. $SQL);
 		}
 		return $_elementsList;
+	}
+	
+		
+	public function getPartialListValuesArray($offset = null, $limit = null, $fieldOrderBy = null, $filterAssociativeArray = array(), $filterWhere = null) {
+		$dataArray = array();
+		foreach ($this->getPartialList($offset, $limit, $fieldOrderBy, $filterAssociativeArray, $filterWhere) as $element) {
+			$dataArray[] =  $element->getValuesArray();
+		}
+		return $dataArray;
 	}
 	
 	public function getTableFieldsArray() {
