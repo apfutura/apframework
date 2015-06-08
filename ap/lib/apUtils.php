@@ -434,7 +434,7 @@ function exportArrayToCsv($exportFile, $rowsArray, $onlyHeaders = false, $string
 			$firstRegister = false;
 			if ($onlyHeaders) break;
 		}
-		fputcsv($fp, $row);
+		fputcsv($fp, $row, $stringDelimiter);
 	}
 	fclose($fp);
 
