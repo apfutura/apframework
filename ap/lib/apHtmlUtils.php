@@ -384,7 +384,7 @@ class apHtmlUtils {
 					}
 					$pageOptions .= '<option '.$tmpSelectd.' value="'.($x*$limit).'"> {$L_PAGE} -'.($x + 1).'-</option>';
 				}				
-				$htmlPages = '<select id="'.$idHtmlNavigator.'_pages" class="navigator">'.$pageOptions."</select>";
+				$htmlPages = '<select id="'.$idHtmlNavigator.'_pages" class="navigator" style="width: auto!important">'.$pageOptions."</select>";
 			} else {
 				$htmlPages = '';
 			}
@@ -409,23 +409,45 @@ class apHtmlUtils {
 			<script>
 					$(function() {
 						var ajaxPopulateElement = '".$params["ajaxPopulateElement"]."';
-						
-						$('#$idHtmlNavigator span.navigator').off().on('click', function() {
-							var url = $('#$idHtmlNavigator').attr('data-url') +  $(this).attr('data-offset');							
-							getJSON(url, function(response) {
-								if (response.result) {
-									$('#' + ajaxPopulateElement).html(response.data);
-								}
-							});							
-						});
-						$('#$idHtmlNavigator select.navigator').off().on('change', function() {
-							var url =  $('#$idHtmlNavigator').attr('data-url') + $(this).val();							
-							getJSON(url, function(response) {
-								if (response.result) {
-									$('#' + ajaxPopulateElement).html(response.data);
-								}
-							});							
-						});
+                                                var jQueryVersion = parseFloat(jQuery.fn.jquery);
+                                                
+                                                if (jQueryVersion > 1.6) {
+                                                    $('#$idHtmlNavigator span.navigator').off().on('click', function() {
+                                                            var url = $('#$idHtmlNavigator').attr('data-url') +  $(this).attr('data-offset');							
+                                                            getJSON(url, function(response) {
+                                                                    if (response.result) {
+                                                                            $('#' + ajaxPopulateElement).html(response.data);
+                                                                    }
+                                                            });							
+                                                    });
+                                                    $('#$idHtmlNavigator select.navigator').off().on('change', function() {
+                                                            var url =  $('#$idHtmlNavigator').attr('data-url') + $(this).val();
+                                                            getJSON(url, function(response) {
+                                                                    if (response.result) {
+                                                                            $('#' + ajaxPopulateElement).html(response.data);
+                                                                    }
+                                                            });							
+                                                    });
+                                                } else {
+                                                    $('#$idHtmlNavigator span.navigator').bind('click', function() {
+                                                            var url = $('#$idHtmlNavigator').attr('data-url') +  $(this).attr('data-offset');	
+                                                                console.log('URL: '+ url+' #' + ajaxPopulateElement);
+                                                            getJSON(url, function(response) {
+                                                                    if (response.result) {
+                                                                            $('#' + ajaxPopulateElement).html(response.data);
+                                                                    }
+                                                            });							
+                                                    });
+                                                    $('#$idHtmlNavigator select.navigator').change(function() {
+                                                            var url =  $('#$idHtmlNavigator').attr('data-url') + $(this).val();	
+                                                                console.log('URL: '+ url+' #' + ajaxPopulateElement);
+                                                            getJSON(url, function(response) {
+                                                                    if (response.result) {
+                                                                            $('#' + ajaxPopulateElement).html(response.data);
+                                                                    }
+                                                            });							
+                                                    });
+                                                }
 					});					
 			</script>";
 		}
