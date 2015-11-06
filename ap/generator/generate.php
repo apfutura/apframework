@@ -1,6 +1,8 @@
 <?php
 $path =  dirname(__FILE__). DIRECTORY_SEPARATOR;
-$cfg = dirname($path).DIRECTORY_SEPARATOR."config".DIRECTORY_SEPARATOR."setup.php";
+$appPath = dirname($path).DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR;
+require_once($appPath."apIncludes.php");
+$cfg = $appPath.DIRECTORY_SEPARATOR."config".DIRECTORY_SEPARATOR."setup.php";
 require_once($cfg);
 require_once(constant('_GLOBAL_MODEL_DIR') . "apApplication.php" );
 
@@ -54,7 +56,7 @@ file_put_contents($controllerFile, $newControllerContents);
 
 
 $mntClassTemplate = $path . "templates". DIRECTORY_SEPARATOR."mntClass_php";
-$mntClassFile = constant("_GLOBAL_MODEL_DIR") . "elements" . DIRECTORY_SEPARATOR . $var['MNTCLASSNAME'] . ".php";
+$mntClassFile = constant("_GLOBAL_APPMODEL_DIR") . "elements" . DIRECTORY_SEPARATOR . $var['MNTCLASSNAME'] . ".php";
 echo "Generating mnt class\n";
 $newMntClassContents = apRender::renderCustom("@".$mntClassTemplate ,$var, null, true);
 echo "Saving to mnt class in $mntClassFile\n";

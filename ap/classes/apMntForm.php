@@ -57,7 +57,7 @@ class apMntForm {
 		
 		$fieldOrderBy = apUtils\getParam( $_REQUEST, $this->table."FieldOrderBy", apSession::getFromSession($this->table."FieldOrderBy", false, null) );
 		if ($fieldOrderBy!=null) apSession::setToSession($this->table."FieldOrderBy", $fieldOrderBy);
-		
+                
 		$filterFieldsAssociativeArray = apSession::getFromSession($this->table ."filterFields", false, array()) ;
 		foreach ($this->getFilterFields() as $filterField) {
 			$valueFilter = apUtils\getParam( $_REQUEST, "filterField_".trim($filterField), null);
@@ -68,17 +68,53 @@ class apMntForm {
 					$filterFieldsAssociativeArray[trim($filterField)] = $valueFilter;
 				}
 			}
+                        $valueFilter = apUtils\getParam( $_REQUEST, "!filterField_".trim($filterField), null);
+                        if ( !is_null($valueFilter) ) {
+				if ($valueFilter == '') {
+					unset($filterFieldsAssociativeArray['!'.trim($filterField)]);
+				} else {
+					$filterFieldsAssociativeArray['!'.trim($filterField)] = $valueFilter;
+				}
+			}
 		}
 		apSession::setToSession($this->table ."filterFields", $filterFieldsAssociativeArray);
 		return array($offset, $fieldOrderBy, $filterFieldsAssociativeArray);
 		
 	}
+        
+        function printHtmlFilters($filterFieldsAssociativeArray, $return = false) 
+        {
+                if (count($filterFieldsAssociativeArray)) $filter = true;
+                foreach ($filterFieldsAssociativeArray as $key => $value) {
+                    $operator = (substr($key, 0, 1) == '!' ? 'false' : 'true');
+                    $field = $this->getField(ltrim ($key ,'!'));
+                    $filterText = ': ('.$field->getHeader().' '.($operator === 'true' ? '{$L_CONTAINS}' : '{$L_NOT_CONTAINS}').' "'.trim($value,'%').'"'.')';
+                }
+                $filtrableFields = $this->getFilterFields();
+                $html = '<style>.filters {margin-left:5px} .filter-image {style="width:20px;height:auto"} .filter-button{border-width:0px;background:transparent}</style>';
+                $html .= '<div id="filters" data-table="'.$this->table.'" '.($filter ? 'hidden' : '').'>';
+                    $html .= '<label class="filters">{$L_FILTER}</label>';
+                    $html .= '<select id="filter_field" data-urlRefreshHTML="'.htmlspecialchars($this->urlRefreshHTML).'" class="filters">';
+                        foreach ($filtrableFields as $filtrableField) {
+                            $html .= '<option id="filter_field_option'.$filtrableField->name.'" name="'.$filtrableField->name.'">'.$filtrableField->getHeader().'</option>';
+                        }
+                    $html .= '</select>';
+                    $html .= '<select id="filter_operator" class="filters">';
+                            $html .= '<option operator="true">{$L_CONTAINS}</option>';
+                            $html .= '<option operator="false">{$L_NOT_CONTAINS}</option>';
+                    $html .= '</select>';
+                    $html .= '<input id="filter_value" type="text" class="filters">';
+                    $html .= '<button id="filter_button" class="filters">{$L_FILTER_BUTTON}</button>';
+                $html .= '</div>';
+                $html .= '<div id="filters_result" data-table="'.$this->table.'" '.($filter ? '' : 'hidden').'><label class="filters">{$L_CURRENT_FILTER}</label><span id="current_filter" class="filters">'.$filterText.'</span><button id="filter_delete_current" class="filters filter-button"><img src="images/icons/cross.png" class="filter-image"/></button></div>';
+                if (!$return) echo $html; else return apRender::replaceTemplateVars($html, array());
+        }
 	
 	function printHtmlTable($offset = 0, $fieldOrderBy = "", $filterAssociativeArray = array(), $return = false, $params = array()) {
 		$limit = $this->maxRegisters;		
 		$filterWhere = null;
 		if (isset($params["filterWhere"])) $filterWhere = $params["filterWhere"];
-		$records = $this->dataSource->getPartialList($offset, $limit, $fieldOrderBy,$filterAssociativeArray, $filterWhere );		
+                $records = $this->dataSource->getPartialList($offset, $limit, $fieldOrderBy,$filterAssociativeArray, $filterWhere );
 		$recordsCount = $this->dataSource->getTotalElements();
 		
 		if ($offset>$recordsCount ) $offset=0; 

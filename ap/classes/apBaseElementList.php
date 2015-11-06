@@ -85,7 +85,7 @@ class apBaseElementList {
 					$not = 'NOT';
 					$field = ltrim ($field ,'!');
 				}
-				$arrayConditions[] = $field . " " . $not. " ILIKE '".$value."'";
+				$arrayConditions[] = " CAST(" .$field . " AS TEXT) " . $not. " ILIKE '".$value."'";
 			}			
 		}
 		

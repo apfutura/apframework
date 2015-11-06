@@ -314,8 +314,11 @@ class NestedPDO extends PDO {
 	}
 
 	public function commit() {
+                if ($this->transLevel == 0) {
+                    throw new Exception("There is no active transaction (transLevel == 0)");
+                }
 		$this->transLevel--;
-
+                
 		if($this->transLevel == 0 || !$this->nestable()) {
 			parent::commit();
 		} else {
@@ -324,6 +327,9 @@ class NestedPDO extends PDO {
 	}
 
 	public function rollBack() {
+                if ($this->transLevel == 0) {
+                    throw new Exception("There is no active transaction (transLevel == 0)");
+                }
 		$this->transLevel--;
 
 		if($this->transLevel == 0 || !$this->nestable()) {
