@@ -111,7 +111,6 @@ class apImport
             $isBom = true;
         }
 
-        var_dump($csvFields);
         $index = 0;
         foreach ($csvFields as $csvHeaderField) {
             $field = trim($csvHeaderField);
@@ -141,7 +140,7 @@ class apImport
             $this->msg = '<h4>{$L_NO_VALID_FIELDS_INTHE_FIRST_ROW}</h4>';
         }
 
-        $this->msg .= 'Found fields: ' .implode(", ", array_keys($fieldIndex))." \n";
+        $this->msg .= '{$L_FOUND_FIELDS}: ' .implode(", ", array_keys($fieldIndex))." \n";
 
         while (($data = fgetcsv($handle, 1000, $this->csvDelimiter)) !== FALSE) {
             $elementData = array();
@@ -178,10 +177,13 @@ class apImport
             }
 
             if (!$lineError) {
+                $id = null;
                 if ($this->customLookupFunction!==null) {
                     $func = $this->customLookupFunction;
                     $result =  $func($elementData);
                     if ($result) $id = $result;
+                } else {
+                  $id = $originalData[$this->keyField];
                 }
 
                 $element = new apBaseElement($this->table, $this->keyField);
@@ -193,7 +195,7 @@ class apImport
                     } else {
                         $result = $element->update($elementData);
                     }
-                    $this->handleResult($element, $result, $total, $originalData, $elementData, '{$L_UPDATED}', '{$L_ERROR_UPDATING_DATA}');
+                    $this->handleResult($element, $result, $total, $originalData, $elementData, '{$L_UPDATED_OK}', '{$L_ERROR_UPDATING_DATA}');
                 } else {
                     if ($this->customInsertElementFunction !== null) {
                         $func = $this->customInsertElementFunction;
@@ -225,14 +227,16 @@ class apImport
     }
 
     function handleResult($element, $result, $line, $originalData, $elementData, $defaultSuccessMessage, $defaultErrorMessage) {
+        $errMsg = '';
         if ($result === true || $result["result"]) {
-            $this->dataOks[] = $this->dataResult($line, $originalData, $defaultSuccessMessage . ' : ' . $originalData["code"]);
+            $this->dataOks[] = $this->dataResult($line, $originalData, $defaultSuccessMessage . ( $result["msg"]?' ('.$result["msg"].')':"") . ($this->keyField && $originalData[$this->keyField]?' : ' . $originalData[$this->keyField]:''));
         } else {
-            $this->dataErrs[] = $this->dataResult($line, $elementData, $defaultErrorMessage . implode(";", $originalData));
             if ($element) {
                 $errMsg = $element->getDB()->getLastErrorMessage();
-                $this->msg .= "<span title='$errMsg '>Line $line not imported due DB error</span> (Line data: " . implode(";", $elementData) . ").\n\n";
+                $this->msg .= "<span title='" . htmlspecialchars($errMsg, ENT_QUOTES) ."'>" .getLangConstant('L_ERROR_IMPORTING_LINE_NUM'). ": $line</span> (" . getLangConstant('L_ROW_DATA'). ": " . implode(";", $elementData) . ").\n";
             }
+            if ($result["msg"]) $errMsg .= $result["msg"];
+            $this->dataErrs[] = $this->dataResult($line, $elementData, ($errMsg?$errMsg:$defaultErrorMessage) . ' ' . implode(";", $originalData));
         }
         $this->msg .= $result["msg"] . "\n";
     }
