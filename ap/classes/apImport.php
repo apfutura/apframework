@@ -159,9 +159,12 @@ class apImport
                         $elementData[$importField->fieldname] = $result["data"];
                     } else {
                         $lineError = true;
+                        $this->msg .= $result['message'] ."\n";
+                        $fieldsErrors[] = $result['message'];
                     }
                 } else {
                     $this->msg .= '{$L_UNEXISTANT_APIMPORTFIELD}';
+                    $fieldsErrors[] =  $field . ' {$L_UNEXISTANT_APIMPORTFIELD}';
                 }
             }
 
@@ -172,8 +175,9 @@ class apImport
                     $elementData = $result["data"];
                 } else {
                     $lineError = true;
+                    $fieldsErrors[] = $result['msg'];
                 }
-                $this->msg .= $result["msg"];
+                $this->msg .= $result["msg"] . "\n";
             }
 
             if (!$lineError) {
@@ -206,7 +210,7 @@ class apImport
                     $this->handleResult($element, $result, $total, $originalData, $elementData, '{$L_INSERTED}', '{$L_ERROR_SAVING_DATA}');
                 }
             } else {
-                $this->dataErrs[] = $this->dataResult($total, $elementData, getLangConstant("L_CSV_IMPORT_ROWDATAERROR") . ": " . implode(", ".$fieldsErrors));
+                $this->dataErrs[] = $this->dataResult($total, $elementData, getLangConstant("L_CSV_IMPORT_ROWDATAERROR") . ": " . implode(", ", $fieldsErrors));
                 $this->msg .= "Line $total not imported due to invalid data values (Line data: ".implode(";",$originalData).").\n\n";
             }
             $total++;
