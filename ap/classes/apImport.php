@@ -16,6 +16,7 @@ class apImport
     public $customLookupFunction = null;
     public $customUpdateElementFunction = null;
     public $customInsertElementFunction = null;
+    public $customAfterLinesProcessedFunction = null;
 
     function __construct($table, $mode, $insensitiveLookups, $updaterepeated, $csvDelimiter, $keyField)
     {
@@ -214,6 +215,13 @@ class apImport
                 $this->msg .= "Line $total not imported due to invalid data values (Line data: ".implode(";",$originalData).").\n\n";
             }
             $total++;
+        }
+
+        if ($this->customAfterLinesProcessedFunction !== null) {
+          $func = $this->customAfterLinesProcessedFunction;
+          $funcResult =  $func();
+          $this->msg .= $funcResult["msg"] . "\n";
+          $this->dataErrs[] = $funcResult["msg"];
         }
 
         fclose($handle);
