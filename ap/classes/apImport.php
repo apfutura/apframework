@@ -221,7 +221,7 @@ class apImport
           $func = $this->customAfterLinesProcessedFunction;
           $funcResult =  $func();
           $this->msg .= $funcResult["msg"] . "\n";
-          $this->dataErrs[] = $funcResult["msg"];
+          if ($funcResult["msg"]) $this->dataErrs[] = $funcResult["msg"];
         }
 
         fclose($handle);
