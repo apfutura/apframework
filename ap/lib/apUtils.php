@@ -31,7 +31,7 @@ function getCurrentUrl() {
     $url .= $_SERVER['REQUEST_URI'];
     return $url;
  }
- 
+
 function generateRandomString($length = 8) {
 	$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	$count = mb_strlen($chars);
@@ -46,7 +46,7 @@ function generateRandomString($length = 8) {
 
 /**
  * @param string with an $address
- * @return array of stdClass'es with lon lat for thew given $address 
+ * @return array of stdClass'es with lon lat for thew given $address
  */
 function findLatLongUsingGoogle($address, $countryFilter = null, $localityFilter = null,  $esrid = null){
 	$google_maps_key='ABQIAAAAgnTxpQK8BMuqqTtXsnuJqhT2yXp_ZAY8_ufC3CFXhHIE1NvwkxQzQMhzEo31ps_yvN1qq_tt7wxC6g';
@@ -55,17 +55,17 @@ function findLatLongUsingGoogle($address, $countryFilter = null, $localityFilter
 	echo $url;
 	$object = json_decode($xml);
 	$result = array();
-	
+
 	foreach ($object->Placemark as $placemark ) {
 		$countryCode  = (isset($placemark->AddressDetails->Country->CountryNameCode)?$placemark->AddressDetails->Country->CountryNameCode:null);
-		$localityName = (isset($placemark->AddressDetails->Country->AdministrativeArea->SubAdministrativeArea->Locality->LocalityName)?$placemark->AddressDetails->Country->AdministrativeArea->SubAdministrativeArea->Locality->LocalityName:null);		
+		$localityName = (isset($placemark->AddressDetails->Country->AdministrativeArea->SubAdministrativeArea->Locality->LocalityName)?$placemark->AddressDetails->Country->AdministrativeArea->SubAdministrativeArea->Locality->LocalityName:null);
 		if ((strtoupper($countryFilter)==strtoupper($countryCode)) || ($countryFilter=null)) {
 			$comparison = \wordMatch::match( array($localityFilter), $localityName, 1, 5);
 			if (isset($comparison[0]->distance)) $comparisonDistance = $comparison[0]->distance; else $comparisonDistance = 5;
 			//echo "$localityFilter i $localityName: $comparisonDistance ";
-			if (($comparisonDistance<5) || ($localityFilter==null)) {				
+			if (($comparisonDistance<5) || ($localityFilter==null)) {
 				$tmp = new \stdClass();
-				$tmp->address = $placemark->address;		
+				$tmp->address = $placemark->address;
 				$lon = $placemark->Point->coordinates[0];
 				$lat = $placemark->Point->coordinates[1];
 				if ($esrid!=null) {
@@ -78,9 +78,9 @@ function findLatLongUsingGoogle($address, $countryFilter = null, $localityFilter
 				$tmp->lon = $lon;
 				$tmp->lat = $lat;
 				$result[] = $tmp;
-			}			
+			}
 		}
-	}	
+	}
 	return $result;
 }
 
@@ -89,7 +89,7 @@ function findLatLongUsingGoogle($address, $countryFilter = null, $localityFilter
  * @return array of stdClass'es with lon lat for thew given $address
  */
 function findLatLongUsingNominatim($address, $countryFilter = null, $localityFilter = null,  $esrid = null){
-	
+
 	$params = "&addressdetails=1&format=json&countrycodes=".$countryFilter;
 	$url = "http://nominatim.openstreetmap.org/search?q=".rawurlencode($address).$params;//&amp;key=".$google_maps_key;
 	//http://open.mapquestapi.com/nominatim/v1/search?
@@ -201,7 +201,7 @@ function getBase64QRImage($qrText) {
 	return base64_encode($imagedata);
 }
 
-function generateElementQRImageFile($qrText) {	
+function generateElementQRImageFile($qrText) {
 	include_once constant("_GLOBAL_LIB_DIR")."phpqrcode/qrlib.php";
 	@mkdir(constant("_GLOBAL_TMP_DIR").'ap/cache/qr', 0777, true);
 	$qrFilename = constant("_GLOBAL_TMP_DIR").'ap/cache/qr/element_'.md5($qrText).'.png';
@@ -250,7 +250,7 @@ function getParam( &$arr, $name, $def=null, $dataType = PARAM_RAW ) {
 			break;
 		case constant('apUtils\PARAM_FLOAT'):
 		    $value = floatvalLocalized($value);
-		    break;			
+		    break;
 		case constant('apUtils\PARAM_ESCAPED_STRING'):
 			$value = htmlspecialchars($value, ENT_QUOTES,'UTF-8');
 			break;
@@ -293,8 +293,8 @@ function getIP() {
 
 function floatvalLocalized($val) {
     return floatval(str_replace(',', '.', str_replace('.', '',$val)));
-} 
- 
+}
+
 
 function exportAsociativeArrayToXLS($array,$filename, $utf8 = false, $separator = null){
 	header("Content-Disposition: attachment; filename=\"$filename\"");
@@ -314,12 +314,12 @@ function exportAsociativeArrayToXLS($array,$filename, $utf8 = false, $separator 
 			echo $headerStr;
 			$flag = true;
 		}
-		
+
 		array_walk($row, function(&$str) {
 				if (!$utf8) $str = utf8_decode($str);
 				$str = preg_replace("/\t/", "\\t", $str);
 				$str = preg_replace("/\r?\n/", "\\n", $str);
-				
+
 				}
 		);
 		if ($separator) {
@@ -333,7 +333,7 @@ function exportAsociativeArrayToXLS($array,$filename, $utf8 = false, $separator 
 
 function getDMYDateFromYMDDate($dateString) {
 	$return = "";
-	if (strlen($dateString)>0) { 
+	if (strlen($dateString)>0) {
 		$return = date("d/m/Y",strtotime($dateString));
 	}
 	return $return;
@@ -347,16 +347,34 @@ function getDMYTimestampFromYMDTimestamp($dateString) {
     return $return;
 }
 
+function getYMDDate($date){
+  $date = str_replace(array('.', '-', '\\\\'), '/', $date);
+  $dateParts = explode("/", $date);
+  $result = null;
+  if (count($dateParts)==3 && is_numeric($dateParts[0]) && is_numeric($dateParts[1]) && is_numeric($dateParts[2]) ) {
+      if ($dateParts[0] > 0 && $dateParts[0] < 32 &&
+          $dateParts[1] > 0 && $dateParts[1] < 13 &&
+          $dateParts[2] > 1000 && $dateParts[2] < 9999) {
+        $result = $dateParts[2] . '/' . $dateParts[1]			. '/' . $dateParts[0];
+      } else if ($dateParts[2] > 0 && $dateParts[2] < 32 &&
+          $dateParts[1] > 0 && $dateParts[1] < 13 &&
+          $dateParts[0] > 1000 && $dateParts[0] < 9999) {
+          $result = $date;
+      }
+  }
+  return $result;
+}
+
 function importCsv($file, $elementType, $fields = array()) {
-	
+
 	if (count($fields) == 0 ) {
 		$tempEntity=new $elementType;
 		$elementFields = $tempEntity->getTableFieldsArray();
 	} else {
 		$elementFields = $fields;
 	}
-	
-	$ok = 0;	
+
+	$ok = 0;
 	$total = 0;
 	$errs = array();
 	$fieldIndex = array();
@@ -368,11 +386,11 @@ function importCsv($file, $elementType, $fields = array()) {
 			$fieldIndex[$field] =  $index;
 		} else {
 			$WarnMSG .= 'Ignoring header "' .$headerField. "\".\n";
-		}					
+		}
 		$index++;
 	}
-	
-	while (($data = fgetcsv($handle, 1000, ";")) !== FALSE)		{		
+
+	while (($data = fgetcsv($handle, 1000, ";")) !== FALSE)		{
 		$elementData = array();
 		foreach ($fieldIndex as $field => $csvIndex) {
 			$elementData[$field] = trim($data[$csvIndex]);
@@ -405,11 +423,11 @@ function exportTableToCsv($exportFile, $table, $fields = null /* array */, $limi
 		$sqlFields = implode(",", $fields);
 	}
 	$SQL = 'SELECT '.$sqlFields.' FROM "'.$table.'"'.$sqlLimit;
- 
+
 	$results = $db->query($SQL);
 	$fp = fopen($exportFile, 'w');
 	$firstRegister = true;
-	
+
 	foreach ($results as $res) {
 		if ($firstRegister) {
 			fputcsv($fp, array_keys($res));
@@ -417,7 +435,7 @@ function exportTableToCsv($exportFile, $table, $fields = null /* array */, $limi
 			if ($onlyHeaders) break;
 		}
 		fputcsv($fp, $res);
-	}			
+	}
 	fclose($fp);
 
 	return true;
@@ -521,7 +539,7 @@ function forceUTF8($text) {
 			$buf .= $c1;
 		}
 	}
-	
+
 	return $buf;
 }
 
@@ -543,21 +561,21 @@ function instanceNewObject($className, $args=array() ) {
     }
 }
 
-function copyFolderRecursively($src,$dst) { 
-    $dir = opendir($src); 
-    @mkdir($dst, 0777, true); 
-    while(false !== ( $file = readdir($dir)) ) { 
-        if (( $file != '.' ) && ( $file != '..' ) && ( !strpos($file, '.php') ) ){ 
-            if ( is_dir($src . '/' . $file) ) { 
-                copyFolderRecursively($src . '/' . $file,$dst . '/' . $file); 
-            } 
-            else { 
-                copy($src . '/' . $file,$dst . '/' . $file); 
-            } 
-        } 
-    } 
-    closedir($dir); 
-} 
+function copyFolderRecursively($src,$dst) {
+    $dir = opendir($src);
+    @mkdir($dst, 0777, true);
+    while(false !== ( $file = readdir($dir)) ) {
+        if (( $file != '.' ) && ( $file != '..' ) && ( !strpos($file, '.php') ) ){
+            if ( is_dir($src . '/' . $file) ) {
+                copyFolderRecursively($src . '/' . $file,$dst . '/' . $file);
+            }
+            else {
+                copy($src . '/' . $file,$dst . '/' . $file);
+            }
+        }
+    }
+    closedir($dir);
+}
 
 function deleteEmptyDirRecursively($dir) {
     if (!is_readable($dir)) {
