@@ -53,7 +53,7 @@ class apMntForm {
 	
 	function getHtmlTableParams() {
 		$offset = apUtils\getParam( $_REQUEST,$this->table ."Offset", apSession::getFromSession($this->table ."Offset", false, 0) );
-		if ($offset!=0) apSession::setToSession($this->table ."Offset", $fieldOrderBy);
+		if ($offset!=0) apSession::setToSession($this->table ."Offset", $offset);
 		
 		$fieldOrderBy = apUtils\getParam( $_REQUEST, $this->table."FieldOrderBy", apSession::getFromSession($this->table."FieldOrderBy", false, null) );
 		if ($fieldOrderBy!=null) apSession::setToSession($this->table."FieldOrderBy", $fieldOrderBy);
