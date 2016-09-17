@@ -43,6 +43,17 @@ class apImport
         return $this->fields;
     }
 
+    function getRequiredFields($onlyName = false) {
+      $requiredFields = [];
+      foreach ($this->getFields() as $field) {
+        if ($field->required) {
+          if ($onlyName) $requiredFields[] = strtoupper($field->name);
+          else  $requiredFields[] = $field;
+        }
+      }
+      return $requiredFields;
+    }
+
     function getField($name) {
         return $this->fields[$name];
     }
@@ -137,13 +148,21 @@ class apImport
         $result = false;
         $total = 1;
 
-        if (count($fieldIndex)==0) {
-            $this->msg = '<h4>{$L_NO_VALID_FIELDS_INTHE_FIRST_ROW}</h4>';
+        $missingPrerequisites = false;
+        if ( count($fieldIndex)==0 ) {
+            $this->msg = '<h4>{$L_NO_VALID_FIELDS_INTHE_FIRST_ROW}</h4>' . "\n";
+            $missingPrerequisites = true;
+        } else {
+          list($allRequiredFieldsInPlace, $missingFields) = $this->_checkRequiredFields( array_keys($fieldIndex) );
+          if (!$allRequiredFieldsInPlace) {
+              $this->msg = '<h4>{$L_MISSING_MANDATORY_FIELDS}: ' . implode(", ", $missingFields) . "</h4>\n";
+              $missingPrerequisites = true;
+          } else {
+              $this->msg .= '{$L_FOUND_FIELDS}: ' .implode(", ", array_keys($fieldIndex))." \n";
+          }
         }
 
-        $this->msg .= '{$L_FOUND_FIELDS}: ' .implode(", ", array_keys($fieldIndex))." \n";
-
-        while (($data = fgetcsv($handle, 1000, $this->csvDelimiter)) !== FALSE) {
+        while (($data = fgetcsv($handle, 1000, $this->csvDelimiter)) !== FALSE && !$missingPrerequisites) {
             $elementData = array();
             $originalData = array();
             $fieldsErrors = array();
@@ -227,6 +246,18 @@ class apImport
         fclose($handle);
 
         return ($result["result"] ? $result["result"] : $result);
+    }
+
+    function _checkRequiredFields($fields)
+    {
+        $requiredFields = $this->getRequiredFields(true);
+        foreach ($fields as  $field ) {
+            $f = strtoupper($field);
+            if (in_array($f, $requiredFields)) {
+              unset( $requiredFields[ array_search( $f, $requiredFields) ] );
+            }
+        }
+        return [count($requiredFields) == 0 , $requiredFields];
     }
 
     function dataResult($total, $elementData, $msg)
