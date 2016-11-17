@@ -212,6 +212,7 @@ class apImport
 
                 $element = new apBaseElement($this->table, $this->keyField);
                 $result = $element->load($id);
+                // Check required fields for each case depending on result
                 if ($result) {
                     if ($this->customUpdateElementFunction !== null) {
                         $func = $this->customUpdateElementFunction;
