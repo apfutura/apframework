@@ -9,16 +9,18 @@ class apImport
     private $insensitiveLookups = true;
     private $updaterepeated = true;
     private $csvDelimiter = ";";
+    private $transactional = false;
     private $msg = "";
     private $dataOks = [];
     private $dataErrs = [];
+    public $customPreviousActionsFunction = null;
     public $customAfterLineCheckFunction = null;
     public $customLookupFunction = null;
     public $customUpdateElementFunction = null;
     public $customInsertElementFunction = null;
     public $customAfterLinesProcessedFunction = null;
 
-    function __construct($table, $mode, $insensitiveLookups, $updaterepeated, $csvDelimiter, $keyField)
+    function __construct($table, $mode, $insensitiveLookups, $updaterepeated, $csvDelimiter, $transactional, $keyField)
     {
         $this->db = apDatabase::getDatabaseLink();
         $this->table = $table;
@@ -27,6 +29,7 @@ class apImport
         $this->insensitiveLookups = $insensitiveLookups;
         $this->updaterepeated = $updaterepeated;
         $this->csvDelimiter = $csvDelimiter;
+        $this->transactional = $transactional;
     }
 
     function addField($field)
@@ -162,6 +165,16 @@ class apImport
           }
         }
 
+        if ($this->transactional) {
+            $this->db->beginTransaction();
+        }
+
+        if ($this->customPreviousActionsFunction!==null) {
+            $func = $this->customPreviousActionsFunction;
+            $result =  $func();
+            $this->msg .= $result["msg"] . "\n";
+        }
+
         while (($data = fgetcsv($handle, 1000, $this->csvDelimiter)) !== FALSE && !$missingPrerequisites) {
             $elementData = array();
             $originalData = array();
@@ -245,6 +258,17 @@ class apImport
         }
 
         fclose($handle);
+
+        if ($this->transactional) {
+            if (count($this->dataErrs) || $result === false || (isset($result["result"]) && $result["result"] === false)) {
+                $this->db->rollBack();
+                $result = false;
+            }
+            else {
+                $this->db->commit();
+                $result = true;
+            }
+        }
 
         return ($result["result"] ? $result["result"] : $result);
     }
