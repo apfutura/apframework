@@ -92,7 +92,7 @@ class apHtmlUtils {
 		return $htmlCombo;
 	}
 
-	static function comboHtml_fromArray($name, $array_values = array(""),$array_label = array(""),$seleccionat,$onchange='',$html_class='',$html_stlye='', $option_generic_attributes = null, $array_attributes_select = array(), $array_row_attributes = array()) {
+	static function comboHtml_fromArray($name, $array_values = array(""),$array_label = array(""),$seleccionat = null,$onchange='',$html_class='',$html_stlye='', $option_generic_attributes = null, $array_attributes_select = array(), $array_row_attributes = array()) {
 		if (strlen($html_class)==0){
 			$html_class = 'stylishCombo';
 		}
@@ -126,7 +126,8 @@ class apHtmlUtils {
 		return $retorna;
 	}
 
-	static function comboHtml_fromTable($name,$camp,$camp_id,$text_inicial_combo,$valor_inicial,$taula,$where,$ordre,$seleccionada,$onclick,$html_class='',$html_stlye='', $array_attributes = null, $array_attributes_select = array() ) {
+
+	static function comboHtml_fromTable($name,$camp,$camp_id,$text_inicial_combo,$valor_inicial,$taula,$where,$ordre,$seleccionada = null,$onclick = null,$html_class='',$html_stlye='', $array_attributes = null, $array_attributes_select = array() ) {
 		if (strlen($html_class)==0){
 			$html_class = 'stylishCombo';
 		}

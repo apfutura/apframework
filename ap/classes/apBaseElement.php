@@ -185,7 +185,7 @@ class apBaseElement {
             $this->_transformStringNullToSQLNull = $bool;
         }
 	
-	public function update($data, $where=null, $forceUpdateOnAllFields = false, &$affectedFields) {
+	public function update($data, $where=null, $forceUpdateOnAllFields = false, &$affectedFields = null) {
 		$ok=false;
 		//Extract "element" data, the rest will be "table specficic" data
 		foreach ($data as $k => $d) {
