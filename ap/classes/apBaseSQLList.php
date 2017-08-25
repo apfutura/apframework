@@ -35,7 +35,7 @@ class apBaseSQLList {
 		$SQL = sprintf ("SELECT * FROM ( ".$this->_sqlQuery.") as xx ORDER BY xx.".$this->getOrderField());
 		//echo $SQL; die();
 		$result = $this->_db->query($SQL, $this->fetchType);
-		if ($result!=false) {
+		if ($result!==false) {
 			foreach ($result as $entity) {
 				$this->_elementsList[$entity[$this->_idField]]=$entity;
 			}
