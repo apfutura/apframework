@@ -5,27 +5,29 @@ Class apReport extends apBaseElement {
 	protected $_templatePath;
 	
 	public function __construct() {
-		parent::__construct('reports');
+		parent::__construct('report');
 		$this->_path = constant('_GLOBAL_TMP_DIR');
 		$this->_templatePath = constant('_GLOBAL_TEMPLATES_DIR')."reports/";
 	}
 	
 	public function getHTML($id, $params = array()) {
 		$_db = apDatabase::getDatabaseLink();
-		list($name, $type, $SQL) = $_db->getFieldsValue("reports", "id", $id, array("name","type","sql"));		
+		list($name, $type, $SQL) = $_db->getFieldsValue("report", "id", $id, array("name","type","sql"));
 		$data = $_db->query($SQL,PDO::FETCH_ASSOC);
 		switch ($type) {
 			case "CUSTOM":
 				$params["RECORDS"] = $data;
-				return apRender::renderCustom($this->_templatePath.$name, $params, null, true);
+				return apRender::renderCustom($this->_templatePath . $name, $params, null, true);
 				break;
-			default:				
-				if ($data==false) {
-					return '{$L_ERROR_EXECUTING}:'.$SQL;
+			default:
+				if ($data === false) {
+					return '{$L_ERROR_EXECUTING}:' . $SQL;
+				} else if ($data == false) {
+					return '{$L_NO_RESULT}';
 				}
 				return apHtmlUtils::tableHtml_fromArray($data);
-				break;				
-		}		
+				break;
+		}
 	}
 
 	public function generate($id, $filename, $params = array()) {
@@ -42,13 +44,16 @@ Class apReport extends apBaseElement {
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');
-		header('Content-Length: ' . filesize($file));
+		header('Content-Length: ' . filesize($report));
 		readfile($report);
 		exit;
 	}
 	
-	public function downloadXLS($id) {
-	
+	public function downloadXLS($id, $filename) {
+		$_db = apDatabase::getDatabaseLink();
+		list($name, $type, $SQL) = $_db->getFieldsValue("report", "id", $id, array("name","type","sql"));
+		$data = $_db->query($SQL,PDO::FETCH_ASSOC);
+		apUtils\exportAsociativeArrayToXLS($data, $filename);
 	}
 	
 	public function downloadPDF($id,$filename) {
@@ -58,7 +63,7 @@ Class apReport extends apBaseElement {
 		header('Expires: 0');
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');
-		header('Content-Length: ' . filesize($file));
+		header('Content-Length: ' . filesize($report));
 		$cmd = 'xvfb-run -a -s "-screen 0 1280x1024x24" wkhtmltopdf --dpi 96 -O landscape --page-size A4 "file:///'.$report.'" '.$this->_path.basename($filename);
 		exec($cmd.' 2>&1', $out);
 		readfile($report);
@@ -68,7 +73,7 @@ Class apReport extends apBaseElement {
 
 Class apReportList extends  apBaseElementList {
 	public function __construct($orderByField = null) {
-		parent::__construct("apReport","reports", "id", $orderByField);
+		parent::__construct("apReport","report", "id", $orderByField);
 	}
 	
 	
