@@ -309,9 +309,9 @@ class apBaseElement {
 	    $dataArray = array();
 	    foreach ($fields as $field) {
 	        $dataArray[$field] =  $this->$field;
-	    }
-	    foreach ($this->_fieldValueCustomFunctions as $customField) {
-	        $dataArray[$customField] =  $this->_fieldValueCustomFunctions[$customField]();
+		}		
+	    foreach ($this->_fieldValueCustomFunctions as $customField => $fn) {			
+	        $dataArray[$customField] =  $fn();
 	    }	    
 	    return $dataArray;
 	}
