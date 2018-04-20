@@ -51,11 +51,11 @@ class apMntForm {
 		return $this->fields[$name];
 	}
 	
-	function getHtmlTableParams() {
+	function getHtmlTableParams($defaultOrderBy = null) {
 		$offset = apUtils\getParam( $_REQUEST,$this->table ."Offset", apSession::getFromSession($this->table ."Offset", false, 0) );
 		if ($offset!=0) apSession::setToSession($this->table ."Offset", $offset);
 		
-		$fieldOrderBy = apUtils\getParam( $_REQUEST, $this->table."FieldOrderBy", apSession::getFromSession($this->table."FieldOrderBy", false, null) );
+		$fieldOrderBy = apUtils\getParam( $_REQUEST, $this->table."FieldOrderBy", apSession::getFromSession($this->table."FieldOrderBy", false, ($defaultOrderBy=!null?$defaultOrderBy:null) ) );
 		if ($fieldOrderBy!=null) apSession::setToSession($this->table."FieldOrderBy", $fieldOrderBy);
                 
 		$filterFieldsAssociativeArray = apSession::getFromSession($this->table ."filterFields", false, array()) ;
