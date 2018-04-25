@@ -93,6 +93,17 @@ class apBaseSQLList {
 		return $_elementsList;
 	}
 
+	public function getElement($id) {
+		if ($id==null) return null;
+		$SQL = "SELECT * FROM ( ".$this->_sqlQuery.") as xx  WHERE xx." .$this->_idField . "= ?";
+		
+		$rows = null;
+		$result = $this->_db->execute($SQL, array($id), $rows, PDO::FETCH_OBJ);		
+		if ($result!==false) {
+			return $rows[0];
+		} else return false;		
+	}
+
 	public function getTotalElements() {
 		return $this->_totalElements ;
 	}
