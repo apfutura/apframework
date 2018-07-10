@@ -20,7 +20,7 @@ class apImport
     public $customInsertElementFunction = null;
     public $customAfterLinesProcessedFunction = null;
 
-    function __construct($table, $mode, $insensitiveLookups, $updaterepeated, $csvDelimiter, $transactional, $keyField)
+    function __construct($table, $mode, $insensitiveLookups, $updaterepeated, $csvDelimiter, $transactional, $keyField = null)
     {
         $this->db = apDatabase::getDatabaseLink();
         $this->table = $table;
