@@ -23,7 +23,8 @@ class apHtmlUtils {
 			$type = "hidden";
 			$attributes[] = "data-type='$type'";
 		}
-		$controlHtml="<input type='".$type."' class='" . implode(" ",$classes) . "' id='" . $inputId . "' name='" . $inputId . "' value=" . json_encode($value) . " placeholder='".$str_descrip."' onchange=\"" . $pOnchange . "\" " . $str_readonly . " " . $str_disabled . " ".implode(" ",$attributes).">";
+		if ($type == 'text') $value = "\"" . $value . "\"";
+		$controlHtml="<input type='".$type."' class='" . implode(" ",$classes) . "' id='" . $inputId . "' name='" . $inputId . "' value=" . $value . " placeholder='".$str_descrip."' onchange=\"" . $pOnchange . "\" " . $str_readonly . " " . $str_disabled . " ".implode(" ",$attributes).">";
 		return $controlHtml;
 	}
 
