@@ -35,8 +35,9 @@ class apMail {
 	}
 	
 	public function sendMail($emailTo, $subject ,$body) {
-		
-		require_once(_GLOBAL_LIB_DIR.'phpmailer/class.phpmailer.php');
+		if (!class_exists('PHPMailer')) {
+			require_once(_GLOBAL_LIB_DIR.'phpmailer/class.phpmailer.php');
+		}
 		$mail             = new PHPMailer();
 		$body             = str_replace("[\]",'',$body);
 		
