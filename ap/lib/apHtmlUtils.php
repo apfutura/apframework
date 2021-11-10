@@ -154,7 +154,7 @@ class apHtmlUtils {
 			$retorna=$retorna."<option value=\"".$str_tmp."\">".$text_inicial_combo."</option>";
 		}
 
-		if (substr($seleccionada,0,2)=="@@") $retorna=$retorna."<option value=\"\">".substr($seleccionada,2,strlen($seleccionada)-2)."</option>";
+		if (!is_array($seleccionada) && substr($seleccionada,0,2)=="@@") $retorna=$retorna."<option value=\"\">".substr($seleccionada,2,strlen($seleccionada)-2)."</option>";
 
 
 
@@ -189,14 +189,11 @@ class apHtmlUtils {
 			$camp_id=substr($camp_id,$pos+4,strlen($camp_id)-($pos+4));
 			}
 
-			if ($row[$camp]==$seleccionada) {
-			$tmpsel="selected='SELECTED'";
-		} else {$tmpsel="";
-		}
-			if ($row[$camp_id]==$seleccionada) {
-			$tmpsel="selected='SELECTED'";
-	} else {$tmpsel="";
-	}
+			if (is_array($seleccionada) ? in_array($row[$camp_id], $seleccionada) : $row[$camp_id]==$seleccionada) {
+			    $tmpsel="selected='SELECTED'";
+		    } else {
+			    $tmpsel="";
+            }
 
 	if ($array_attributes!=null) {
 		$tmpatt=" ".$array_attributes[$i];
